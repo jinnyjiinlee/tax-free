@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "세무 Free | 프리랜서·소규모 사업자 세무 상담",
-  description: "종합소득세, 부가가치세, 사업자등록 등 기본 세무 상담 AI 챗봇",
+  title: "텍스프리 | 개인사업자들의 세금을 책임집니다",
+  description: "법인 말고 개인사업자만을 위한 세무 AI. 나의 세무 상태를 진단하고, 맞춤형 상담을 받아보세요.",
 };
 
 export default function RootLayout({
@@ -13,7 +13,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body className="antialiased min-h-screen">{children}</body>
+      <head>
+        <link
+          rel="stylesheet"
+          as="style"
+          crossOrigin="anonymous"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+        />
+      </head>
+      <body className="antialiased min-h-screen font-sans">{children}</body>
     </html>
   );
 }
