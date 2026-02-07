@@ -12,6 +12,7 @@ function generateId() {
 export default function Home() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
 
   const handleSend = useCallback(async (content: string) => {
     const userMessage: ChatMessage = {
@@ -27,19 +28,26 @@ export default function Home() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: content }),
+        body: JSON.stringify({
+          question: content,
+          conversationId: conversationId ?? undefined,
+        }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "요청에 실패했습니다.");
+        throw new Error(data.message || data.error || "요청에 실패했습니다.");
+      }
+
+      if (data.conversationId) {
+        setConversationId(data.conversationId);
       }
 
       const assistantMessage: ChatMessage = {
         id: generateId(),
         role: "assistant",
-        content: data.message,
+        content: data.answer,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMessage]);

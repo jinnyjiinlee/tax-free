@@ -1,48 +1,171 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findRelevantKnowledge } from "@/app/data/tax-knowledge";
+import { openai, CONFIG } from "@/app/backend/lib/openai";
+import { validateRequest } from "@/app/backend/lib/validation";
+import { logAPICall } from "@/app/backend/lib/logger";
+import type { ChatResponse, ErrorResponse } from "@/app/backend/lib/types";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
-export async function POST(request: NextRequest) {
-  try {
-    const { message } = await request.json();
+function extractAnswer(response: any): string {
+  if (typeof response?.output_text === "string" && response.output_text) {
+    return response.output_text;
+  }
 
-    if (!message || typeof message !== "string") {
-      return NextResponse.json(
-        { error: "message is required" },
+  if (Array.isArray(response?.output_text) && response.output_text.length > 0) {
+    return response.output_text.join("\n");
+  }
+
+  const messageOutput = response?.output?.find(
+    (item: any) => item.type === "message"
+  );
+  if (messageOutput?.content?.length) {
+    const textContent = messageOutput.content.find(
+      (content: any) => content.type === "text" && content.text
+    );
+    if (textContent?.text) {
+      return textContent.text;
+    }
+  }
+
+  throw new Error("No text content");
+}
+
+export async function POST(request: NextRequest) {
+  const start = Date.now();
+  let activeConversationId: string | undefined;
+
+  try {
+    const body = await request.json();
+    const { conversationId, question } = validateRequest(body);
+
+    activeConversationId = conversationId;
+
+    const requestBody: Parameters<typeof openai.responses.create>[0] = {
+      model: CONFIG.MODEL,
+      prompt: { id: CONFIG.PROMPT_ID },
+      input: [
+        {
+          type: "message",
+          role: "user",
+          content: question,
+        },
+      ],
+      tools: [
+        {
+          type: "file_search",
+          vector_store_ids: [CONFIG.VECTOR_STORE_ID],
+        },
+      ],
+      max_output_tokens: CONFIG.MAX_OUTPUT_TOKENS,
+      temperature: CONFIG.TEMPERATURE,
+      store: true,
+    };
+
+    if (activeConversationId) {
+      requestBody.conversation = activeConversationId;
+    }
+
+    const response = await openai.responses.create(requestBody);
+
+    const answer = extractAnswer(response);
+    const responseConversationId = (() => {
+      if (response && "conversation" in response) {
+        const conversation = (response as { conversation?: unknown })
+          .conversation;
+        if (typeof conversation === "string") {
+          return conversation;
+        }
+        if (
+          conversation &&
+          typeof conversation === "object" &&
+          "id" in conversation
+        ) {
+          const conversationId = (conversation as { id?: string }).id;
+          if (conversationId) {
+            return conversationId;
+          }
+        }
+      }
+
+      const fallbackId = (response as { id?: string })?.id;
+      return activeConversationId ?? fallbackId ?? "unknown";
+    })();
+
+    const responseData: ChatResponse = {
+      conversationId: responseConversationId,
+      answer,
+      timestamp: new Date().toISOString(),
+    };
+
+    logAPICall({
+      conversationId: responseConversationId,
+      duration: Date.now() - start,
+    });
+
+    return NextResponse.json(responseData, {
+      status: 200,
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+      },
+    });
+  } catch (error: any) {
+    console.error("Chat API error:", error);
+
+    logAPICall({
+      conversationId: activeConversationId ?? "unknown",
+      duration: Date.now() - start,
+      error: error?.message ?? "unknown_error",
+    });
+
+    if (error?.name === "ZodError") {
+      return NextResponse.json<ErrorResponse>(
+        {
+          error: "INVALID_REQUEST",
+          message: "잘못된 요청입니다",
+          details: error.errors,
+        },
         { status: 400 }
       );
     }
 
-    // 관련 세무 지식 검색
-    const relevantKnowledge = findRelevantKnowledge(message);
-
-    // 지식 기반 응답 생성
-    let response = "";
-
-    if (relevantKnowledge.length > 0) {
-      response = relevantKnowledge
-        .map(
-          (k) =>
-            `[${k.category}]\n${k.content}`
-        )
-        .join("\n\n---\n\n");
-
-      response = `${response}\n\n위 내용은 일반적인 안내이며, 개인별 상황에 따라 다를 수 있습니다. 정확한 상담은 국세청(126) 또는 세무사에게 문의하시기 바랍니다.`;
-    } else {
-      response = `죄송합니다. "${message}"와 관련된 세무 정보를 찾지 못했습니다.\n\n다음 주제로 질문해 보세요:\n- 종합소득세 / 사업소득\n- 부가가치세 / 간이과세\n- 사업자등록\n- 세금 신고 일정\n\n국세청 홈택스(hometax.go.kr) 또는 126으로도 문의하실 수 있습니다.`;
+    if (error?.status === 404 && activeConversationId) {
+      return NextResponse.json<ErrorResponse>(
+        {
+          error: "CONVERSATION_NOT_FOUND",
+          message: "존재하지 않는 대화입니다",
+        },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json({
-      message: response,
-      sources: relevantKnowledge.map((k) => k.category),
-    });
-  } catch (error) {
-    console.error("Chat API error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
+    if (error?.status) {
+      return NextResponse.json<ErrorResponse>(
+        {
+          error: "OPENAI_API_ERROR",
+          message: "AI 서비스 오류입니다. 잠시 후 다시 시도해주세요",
+        },
+        { status: 502 }
+      );
+    }
+
+    return NextResponse.json<ErrorResponse>(
+      {
+        error: "INTERNAL_ERROR",
+        message: "서버 오류가 발생했습니다",
+      },
       { status: 500 }
     );
   }
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  });
 }
