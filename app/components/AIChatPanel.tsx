@@ -7,6 +7,7 @@ import remarkGfm from "remark-gfm";
 import { DiagnosisResult } from "@/app/types/diagnosis";
 import TaxFreeCharacter from "./TaxFreeCharacter";
 import { IconDocument, IconReceipt, IconCurrency, IconBuilding } from "./Icons";
+import { VisualCard, detectVisualCard, type VisualCardType } from "./ChatVisualCards";
 
 interface ChatMessage {
   id: string;
@@ -15,6 +16,7 @@ interface ChatMessage {
   timestamp: Date;
   feedback?: "like" | "dislike" | null;
   isError?: boolean;
+  visualCard?: VisualCardType | null;
 }
 
 interface AIChatPanelProps {
@@ -207,11 +209,16 @@ export default function AIChatPanel({
 
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
+
+      // 사용자 질문에 맞는 시각화 카드 감지
+      const cardType = detectVisualCard(content);
+
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: "",
         timestamp: new Date(),
+        visualCard: cardType,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -404,9 +411,15 @@ export default function AIChatPanel({
                         </button>
                       </div>
                     ) : (
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {msg.content || " "}
-                      </ReactMarkdown>
+                      <>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {msg.content || " "}
+                        </ReactMarkdown>
+                        {/* 시각화 카드 - 스트리밍 완료 후 표시 */}
+                        {msg.visualCard && !(isStreaming && idx === messages.length - 1) && (
+                          <VisualCard type={msg.visualCard} result={diagnosisResult} />
+                        )}
+                      </>
                     )}
                   </div>
                 ) : (

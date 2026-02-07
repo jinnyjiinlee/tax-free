@@ -17,6 +17,10 @@ import {
   Shield,
   Clock,
   Calendar,
+  FileText,
+  Receipt,
+  Flame,
+  AlertTriangle,
 } from "lucide-react";
 import TaxFreeCharacter from "./components/TaxFreeCharacter";
 
@@ -37,7 +41,7 @@ function useScrollReveal() {
           observer.unobserve(el);
         }
       },
-      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0.05, rootMargin: "0px 0px 60px 0px" }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -61,7 +65,7 @@ function useCounter(target: number, duration = 1500) {
           observer.unobserve(el);
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.1 }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -146,6 +150,155 @@ const FAQ = [
 ];
 
 /* ─────────────────────────────────────────
+   세무 캘린더 프리뷰 (랜딩 전용)
+───────────────────────────────────────── */
+
+interface LandingTaxEvent {
+  month: number;
+  day: string;
+  deadline: number;
+  title: string;
+  category: "income-tax" | "vat" | "withholding";
+  tip?: string;
+}
+
+const LANDING_TAX_EVENTS: LandingTaxEvent[] = [
+  { month: 1,  day: "1~25일",  deadline: 25, title: "부가가치세 확정신고",       category: "vat" },
+  { month: 3,  day: "10일",    deadline: 10, title: "원천징수 지급명세서 제출",   category: "withholding" },
+  { month: 4,  day: "1~25일",  deadline: 25, title: "부가가치세 예정신고",       category: "vat" },
+  { month: 5,  day: "1~31일",  deadline: 31, title: "종합소득세 확정신고·납부",   category: "income-tax", tip: "개인사업자 최대 세금" },
+  { month: 7,  day: "1~25일",  deadline: 25, title: "부가가치세 확정신고",       category: "vat" },
+  { month: 10, day: "1~25일",  deadline: 25, title: "부가가치세 예정신고",       category: "vat" },
+  { month: 11, day: "1~30일",  deadline: 30, title: "종합소득세 중간예납",       category: "income-tax" },
+];
+
+const LANDING_CAT_STYLE: Record<string, { dot: string; bg: string; text: string; label: string; icon: typeof FileText }> = {
+  "income-tax":  { dot: "bg-blue-500",   bg: "bg-blue-500",   text: "text-blue-600",   label: "종합소득세", icon: FileText },
+  vat:           { dot: "bg-violet-500",  bg: "bg-violet-500", text: "text-violet-600",  label: "부가가치세", icon: Receipt },
+  withholding:   { dot: "bg-amber-500",   bg: "bg-amber-500",  text: "text-amber-600",   label: "원천징수",   icon: FileText },
+};
+
+function getLandingDday(month: number, deadline: number) {
+  const now = new Date();
+  const year = now.getFullYear();
+  const target = new Date(year, month - 1, deadline);
+  const today = new Date(year, now.getMonth(), now.getDate());
+  if (target < today) return { text: "완료", urgent: false, past: true };
+  const diff = Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  if (diff <= 0) return { text: "D-Day", urgent: true, past: false };
+  if (diff <= 30) return { text: `D-${diff}`, urgent: true, past: false };
+  return { text: `${month}월`, urgent: false, past: false };
+}
+
+const MONTH_LABELS = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
+
+function LandingTaxCalendar() {
+  const currentMonth = new Date().getMonth() + 1;
+  const upcoming = LANDING_TAX_EVENTS
+    .filter((e) => !getLandingDday(e.month, e.deadline).past)
+    .slice(0, 4);
+
+  // 각 월에 이벤트가 있는지 매핑
+  const monthEventMap = new Map<number, LandingTaxEvent[]>();
+  LANDING_TAX_EVENTS.forEach((e) => {
+    if (!monthEventMap.has(e.month)) monthEventMap.set(e.month, []);
+    monthEventMap.get(e.month)!.push(e);
+  });
+
+  return (
+    <div className="space-y-8">
+      {/* 월별 미니 그리드 */}
+      <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-2">
+        {MONTH_LABELS.map((label, i) => {
+          const month = i + 1;
+          const isCurrent = month === currentMonth;
+          const events = monthEventMap.get(month) || [];
+          const hasEvent = events.length > 0;
+
+          return (
+            <div
+              key={month}
+              className={`relative rounded-xl p-3 text-center transition-all duration-300 ${
+                isCurrent
+                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20 scale-105"
+                  : hasEvent
+                  ? "bg-white border border-slate-200/80 shadow-sm hover:shadow-md hover:border-slate-300 hover:-translate-y-0.5"
+                  : "bg-slate-50/50 border border-slate-100/50"
+              }`}
+            >
+              <p className={`text-xs font-bold mb-1.5 ${
+                isCurrent ? "text-white/80" : hasEvent ? "text-slate-900" : "text-slate-300"
+              }`}>
+                {label}
+              </p>
+              {hasEvent ? (
+                <div className="flex justify-center gap-1">
+                  {events.map((e, idx) => (
+                    <span
+                      key={idx}
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        isCurrent ? "bg-white/70" : LANDING_CAT_STYLE[e.category].dot
+                      }`}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="h-1.5" />
+              )}
+              {isCurrent && (
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white animate-pulse" />
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* 다가오는 일정 카드 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {upcoming.map((event, i) => {
+          const cat = LANDING_CAT_STYLE[event.category];
+          const dday = getLandingDday(event.month, event.deadline);
+          const CatIcon = cat.icon;
+
+          return (
+            <div
+              key={i}
+              className="group flex items-start gap-4 bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 hover:-translate-y-0.5 transition-all duration-500"
+            >
+              <div className={`w-10 h-10 rounded-xl ${cat.bg} flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                <CatIcon className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`text-[10px] font-semibold ${cat.text} uppercase tracking-wide`}>{cat.label}</span>
+                  {event.tip && (
+                    <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
+                      {event.tip}
+                    </span>
+                  )}
+                </div>
+                <h4 className="font-semibold text-slate-900 text-sm leading-snug">{event.title}</h4>
+                <div className="flex items-center gap-1 mt-1.5">
+                  <Clock className="w-3 h-3 text-slate-300" />
+                  <span className="text-xs text-slate-400">{event.month}월 {event.day}</span>
+                </div>
+              </div>
+              <span className={`flex-shrink-0 text-xs font-bold px-2.5 py-1 rounded-lg ${
+                dday.urgent
+                  ? "bg-red-50 text-red-600 ring-1 ring-red-200"
+                  : "bg-slate-50 text-slate-500"
+              }`}>
+                {dday.text}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────
    Sub-components
 ───────────────────────────────────────── */
 
@@ -200,8 +353,8 @@ function HeroDemoChat() {
       <div className="px-4 py-5 space-y-3 bg-gradient-to-b from-slate-50/50 to-white min-h-[180px]">
         {/* 유저 메시지 */}
         <div className="flex justify-end opacity-0 animate-chat-msg-1">
-          <div className="bg-slate-900 text-white text-[13px] rounded-2xl rounded-br-md px-4 py-2.5 max-w-[75%]">
-            프리랜서인데 세금 얼마나 내야해요?
+          <div className="bg-slate-900 text-white text-[13px] rounded-2xl rounded-br-md px-4 py-2.5 max-w-[80%]">
+            종합소득세랑 부가가치세 차이가 뭐예요?
           </div>
         </div>
 
@@ -222,7 +375,7 @@ function HeroDemoChat() {
             <span className="text-white text-[9px] font-bold">T</span>
           </div>
           <div className="bg-white border border-slate-100 text-slate-700 text-[13px] rounded-2xl rounded-bl-md px-4 py-2.5 max-w-[80%] shadow-sm leading-relaxed">
-            월 매출이 <strong className="text-slate-900">500만원</strong>이라면, 연간 종합소득세는 약 <strong className="text-blue-600">120만원</strong>으로 예상돼요.
+            <strong className="text-slate-900">종합소득세</strong>는 1년간 번 <strong className="text-blue-600">소득</strong>에 대한 세금이고, <strong className="text-slate-900">부가가치세</strong>는 물건·서비스 <strong className="text-violet-600">거래</strong>에 붙는 세금이에요.
           </div>
         </div>
 
@@ -230,7 +383,7 @@ function HeroDemoChat() {
         <div className="flex justify-start gap-2 opacity-0 animate-chat-msg-3">
           <div className="w-6 h-6" />
           <div className="bg-blue-50 border border-blue-100 text-slate-600 text-[12px] rounded-xl px-3.5 py-2 max-w-[80%]">
-            📌 경비처리를 잘하면 <strong className="text-blue-700">30~50% 절세</strong>가 가능해요!
+            💡 쉽게 말하면 종소세는 <strong className="text-blue-700">5월에 한 번</strong>, 부가세는 <strong className="text-blue-700">분기마다</strong> 신고해요!
           </div>
         </div>
       </div>
@@ -552,6 +705,62 @@ export default function Home() {
               </ScrollReveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      <div className="section-divider" />
+
+      {/* ████████ 세무 캘린더 프리뷰 ████████ */}
+      <section className="relative z-10 py-24 bg-white overflow-hidden">
+        {/* 배경 장식 */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-50/30 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-violet-50/20 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="relative max-w-6xl mx-auto px-5 lg:px-8">
+          <ScrollReveal className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50/80 border border-blue-100/60 mb-6">
+              <Calendar className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-medium text-blue-700 tracking-tight">2025년 세무 캘린더</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-[-0.03em]">
+              신고 기한, 한눈에 확인하세요
+            </h2>
+            <p className="text-slate-500 max-w-xl mx-auto text-[15px]">
+              놓치면 가산세! 개인사업자라면 반드시 알아야 할 세무 일정
+            </p>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.1}>
+            <LandingTaxCalendar />
+          </ScrollReveal>
+
+          {/* CTA 배너 */}
+          <ScrollReveal delay={0.3} className="mt-10">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-8 sm:p-10">
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[60px]" />
+              <div className="relative flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
+                <div className="flex-1 text-center sm:text-left">
+                  <div className="flex items-center gap-2 justify-center sm:justify-start mb-2">
+                    <Flame className="w-4 h-4 text-orange-400" />
+                    <span className="text-sm font-semibold text-white/90">맞춤 캘린더 받기</span>
+                  </div>
+                  <p className="text-sm text-slate-400 leading-relaxed">
+                    2분 진단을 완료하면 <span className="text-white font-medium">나의 업종·과세유형에 맞는 일정</span>만 골라서 보여드려요.
+                    <br className="hidden sm:block" />
+                    D-day 알림과 예상 납부액까지 한번에 확인하세요.
+                  </p>
+                </div>
+                <Link
+                  href="/diagnosis"
+                  className="btn-shine flex-shrink-0 inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white text-slate-900 font-semibold text-sm hover:bg-slate-50 transition-all shadow-xl hover:shadow-2xl"
+                >
+                  나만의 캘린더 받기
+                  <ArrowRight className="w-4 h-4" strokeWidth={2.5} />
+                </Link>
+              </div>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
