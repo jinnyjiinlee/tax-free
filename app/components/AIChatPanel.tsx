@@ -266,6 +266,13 @@ export default function AIChatPanel({
   };
 
   const formatTime = (date: Date) => {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+    if (diffSec < 10) return "방금 전";
+    if (diffSec < 60) return `${diffSec}초 전`;
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}분 전`;
     return date.toLocaleTimeString("ko-KR", {
       hour: "2-digit",
       minute: "2-digit",
