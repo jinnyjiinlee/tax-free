@@ -71,6 +71,7 @@ export default function AIChatPanel({
   const [showScrollDown, setShowScrollDown] = useState(false);
   const [toast, setToast] = useState<{ type: "copy" | "newChat"; visible: boolean }>({ type: "copy", visible: false });
   const [lastUserMessage, setLastUserMessage] = useState<string | null>(null); // 재시도용
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -152,6 +153,7 @@ export default function AIChatPanel({
     setMessages([]);
     setInput("");
     setLastUserMessage(null);
+    setConversationId(null);
     showToast("newChat");
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -189,26 +191,26 @@ export default function AIChatPanel({
     abortControllerRef.current = abortController;
 
     try {
-      const chatHistory = messages.slice(-10).map((m) => ({
-        role: m.role,
-        content: m.content,
-      }));
-
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: content,
-          messages: chatHistory,
-          diagnosisResult,
+          question: content,
+          conversationId: conversationId ?? undefined,
         }),
         signal: abortController.signal,
       });
 
-      if (!res.ok) throw new Error("응답 생성 실패");
+      const data = await res.json();
 
-      const reader = res.body?.getReader();
-      const decoder = new TextDecoder();
+      if (!res.ok) {
+        throw new Error(data.message || data.error || "요청에 실패했습니다.");
+      }
+
+      // conversationId 저장 (대화 연속성 유지)
+      if (data.conversationId) {
+        setConversationId(data.conversationId);
+      }
 
       // 사용자 질문에 맞는 시각화 카드 감지
       const cardType = detectVisualCard(content);
@@ -216,43 +218,12 @@ export default function AIChatPanel({
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "",
+        content: data.answer,
         timestamp: new Date(),
         visualCard: cardType,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
-
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value);
-          const lines = chunk.split("\n");
-
-          for (const line of lines) {
-            if (line.startsWith("data: ")) {
-              const data = line.slice(6);
-              if (data === "[DONE]") continue;
-
-              try {
-                const parsed = JSON.parse(data);
-                if (parsed.content) {
-                  assistantMessage.content += parsed.content;
-                  setMessages((prev) => {
-                    const updated = [...prev];
-                    updated[updated.length - 1] = { ...assistantMessage };
-                    return updated;
-                  });
-                }
-              } catch {
-                // ignore
-              }
-            }
-          }
-        }
-      }
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
         return;
