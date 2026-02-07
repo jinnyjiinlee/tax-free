@@ -394,7 +394,7 @@ export default function AIChatPanel({
                     )}
                   </div>
                 ) : (
-                  <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
+                  <p className="text-sm whitespace-pre-wrap break-words text-white">{msg.content}</p>
                 )}
               </div>
 
