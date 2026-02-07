@@ -329,7 +329,7 @@ export default function AIChatPanel({
                         key={q}
                         onClick={() => handleSend(q)}
                         disabled={isLoading}
-                        className="w-full text-left px-4 py-3 min-h-[44px] bg-white/80 backdrop-blur-sm border border-blue-100 rounded-xl text-sm text-[#424245] hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-white/80 disabled:hover:border-blue-100"
+                        className="w-full text-left px-4 py-3 min-h-[44px] bg-white/90 backdrop-blur-sm border border-slate-200/80 rounded-2xl text-sm text-[#424245] hover:bg-blue-50/80 hover:border-blue-200 hover:text-blue-700 transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-white/80 disabled:hover:border-slate-200/80"
                         aria-label={`예시 질문: ${q}`}
                       >
                         {q}

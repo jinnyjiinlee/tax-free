@@ -10,6 +10,15 @@ import TaxKnowledgeAccordion from "@/app/components/TaxKnowledgeAccordion";
 import AIChatPanel from "@/app/components/AIChatPanel";
 import { IconCalendar } from "@/app/components/Icons";
 
+const INDUSTRY_LABELS: Record<string, string> = {
+  "food-store": "음식점/카페",
+  retail: "소매/쇼핑몰",
+  service: "서비스업",
+  freelancer: "프리랜서",
+  education: "학원/교육",
+  other: "기타",
+};
+
 export default function DashboardPage() {
   const router = useRouter();
   const [result, setResult] = useState<DiagnosisResult | null>(null);
@@ -67,23 +76,52 @@ export default function DashboardPage() {
 
   if (!result) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fafafa]">
-        <div className="w-full max-w-md space-y-6 p-8">
-          <div className="h-8 bg-slate-200 rounded-lg animate-pulse" />
-          <div className="h-32 bg-slate-100 rounded-2xl animate-pulse" />
-          <div className="grid grid-cols-2 gap-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#fafafa] noise-bg" role="status" aria-live="polite" aria-label="대시보드 로딩 중">
+        <div className="w-full max-w-2xl space-y-6 p-8">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-slate-200 animate-pulse" />
+            <div className="h-8 flex-1 bg-slate-200 rounded-lg animate-pulse" />
+          </div>
+          <div className="h-40 bg-slate-100 rounded-2xl animate-pulse" />
+          <div className="grid grid-cols-3 gap-4">
             <div className="h-24 bg-slate-100 rounded-xl animate-pulse" />
             <div className="h-24 bg-slate-100 rounded-xl animate-pulse" />
+            <div className="h-24 bg-slate-100 rounded-xl animate-pulse" />
+          </div>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="h-64 bg-slate-100 rounded-2xl animate-pulse" />
+            <div className="h-64 bg-slate-100 rounded-2xl animate-pulse" />
           </div>
         </div>
       </div>
     );
   }
 
+  const total = result.estimatedIncomeTax + result.estimatedVAT + result.estimatedInsurance;
+  const monthlyAvg = Math.floor(total / 12);
+
   const taxItems = [
     { label: "예상 종합소득세", value: result.estimatedIncomeTax, color: "blue" },
     { label: "예상 부가가치세", value: result.estimatedVAT, color: "violet" },
     { label: "예상 4대보험", value: result.estimatedInsurance, color: "emerald" },
+  ];
+
+  const summaryCards = [
+    {
+      label: "업종",
+      value: INDUSTRY_LABELS[result.answers.industry] || "기타",
+      sub: result.taxType === "simplified" ? "간이과세자" : "일반과세자",
+    },
+    {
+      label: "연간 총 세금",
+      value: `${total.toLocaleString()}만원`,
+      sub: `월 평균 ${monthlyAvg.toLocaleString()}만원`,
+    },
+    {
+      label: "예상 절세액",
+      value: `${Math.floor(total * 0.15).toLocaleString()}만원`,
+      sub: "경비처리 최적화 시",
+    },
   ];
 
   return (
@@ -109,6 +147,17 @@ export default function DashboardPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-semibold text-[#1d1d1f] mb-2 tracking-tight">맞춤 세무 대시보드</h1>
           <p className="text-slate-400 font-normal">진단 결과를 바탕으로 준비된 정보입니다</p>
+        </div>
+
+        {/* 핵심 요약 카드 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          {summaryCards.map((card) => (
+            <div key={card.label} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">{card.label}</p>
+              <p className="text-xl font-bold text-[#1d1d1f] tracking-tight">{card.value}</p>
+              <p className="text-sm text-slate-500 mt-0.5">{card.sub}</p>
+            </div>
+          ))}
         </div>
 
         {/* 진단 결과 요약 - 프리미엄 카드 */}

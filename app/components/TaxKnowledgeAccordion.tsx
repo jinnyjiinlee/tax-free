@@ -24,13 +24,15 @@ export default function TaxKnowledgeAccordion() {
         const isOpen = openIndex === categoryIndex;
 
         return (
-          <div key={category} className="border border-blue-200 rounded-xl overflow-hidden">
+          <div key={category} className="border border-slate-200 rounded-xl overflow-hidden hover:border-slate-300 transition-colors">
             <button
               onClick={() => setOpenIndex(isOpen ? null : categoryIndex)}
               aria-expanded={isOpen}
               aria-controls={`knowledge-content-${categoryIndex}`}
               id={`knowledge-trigger-${categoryIndex}`}
-              className="w-full px-6 py-4 min-h-[44px] bg-blue-50/50 hover:bg-blue-50 transition-colors flex items-center justify-between text-left"
+              className={`w-full px-6 py-4 min-h-[44px] transition-colors flex items-center justify-between text-left ${
+                isOpen ? "bg-blue-50/80" : "bg-slate-50/50 hover:bg-slate-50"
+              }`}
             >
               <h3 className="font-semibold text-[#1d1d1f]">{category}</h3>
               <svg
@@ -50,10 +52,10 @@ export default function TaxKnowledgeAccordion() {
               </svg>
             </button>
             {isOpen && (
-              <div id={`knowledge-content-${categoryIndex}`} className="px-6 py-4 bg-white border-t border-blue-100" role="region" aria-labelledby={`knowledge-trigger-${categoryIndex}`}>
+              <div id={`knowledge-content-${categoryIndex}`} className="px-6 py-4 bg-white border-t border-slate-100" role="region" aria-labelledby={`knowledge-trigger-${categoryIndex}`}>
                 <div className="space-y-4">
                   {items.map((item, itemIndex) => (
-                    <div key={itemIndex} className="pb-4 last:pb-0 border-b border-blue-50 last:border-0">
+                    <div key={itemIndex} className="pb-4 last:pb-0 border-b border-slate-100 last:border-0">
                       <div className="text-sm text-[#86868b] mb-2">
                         <span className="font-medium text-[#6e6e73]">관련 키워드:</span>{" "}
                         {item.keywords.join(", ")}

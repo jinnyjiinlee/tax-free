@@ -105,7 +105,7 @@ const FEATURES = [
   {
     icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />,
     title: "2분 세무 진단",
-    description: "5가지 질문만 답하면 나의 세무 유형과 연간 예상 세금을 즉시 확인",
+    description: "7가지 질문만 답하면 나의 세무 유형과 연간 예상 세금을 즉시 확인",
     gradient: "from-blue-500 to-blue-600",
     shadow: "shadow-blue-500/20",
   },
