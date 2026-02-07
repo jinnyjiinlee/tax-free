@@ -278,14 +278,26 @@ export default function DiagnosisPage() {
                 {step + 1} / {QUESTIONS.length}
               </span>
               <div className="flex gap-1">
-                {QUESTIONS.map((_, i) => (
-                  <div
-                    key={i}
-                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                      i <= step ? "bg-blue-600" : "bg-slate-200"
-                    } ${i === step ? "scale-125" : ""}`}
-                  />
-                ))}
+                {QUESTIONS.map((_, i) => {
+                  const canJump = i < step && answers[QUESTIONS[i].id] !== undefined;
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      disabled={!canJump && i !== step}
+                      onClick={() => {
+                        if (canJump) {
+                          setDirection(i < step ? "backward" : "forward");
+                          setStep(i);
+                        }
+                      }}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        i <= step ? "bg-blue-600" : "bg-slate-200"
+                      } ${i === step ? "scale-125" : ""} ${canJump ? "cursor-pointer hover:scale-150" : i === step ? "" : "cursor-default"}`}
+                      aria-label={`${i + 1}단계로 이동`}
+                    />
+                  );
+                })}
               </div>
             </div>
             <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
