@@ -1,14 +1,13 @@
 # 텍스프리 (Tax Free) 프로젝트 규칙
 
 ## 브랜치 전략
-- **main**: 완성된 코드만 유지 (건드리지 않기)
-- **jinny**: 개발 작업 브랜치 (기본 작업 브랜치)
+- **main**: 개발 작업 브랜치 (기본 작업 브랜치)
 
 ## 작업 흐름
-1. 항상 `jinny` 브랜치에서 작업
-2. 변경사항 커밋: `git add . && git commit -m "메시지"`
-3. 푸시: `git push origin jinny`
-4. 또는 스크립트 사용: `./commit-and-push.sh "커밋 메시지"`
+1. `main` 브랜치에서 작업
+2. 작업 전 `git pull origin main`으로 최신 코드 받기
+3. 변경사항 커밋: `git add . && git commit -m "메시지"`
+4. 푸시: `git push origin main`
 
 ## 커밋 메시지 형식
 - `feat: 새로운 기능 추가`

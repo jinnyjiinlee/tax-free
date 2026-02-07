@@ -1,13 +1,17 @@
 import { NextRequest } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { DiagnosisResult } from "@/app/types/diagnosis";
+import { findRelevantKnowledge, TaxKnowledgeItem } from "@/app/data/tax-knowledge";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
-function buildSystemPrompt(diagnosisResult?: DiagnosisResult): string {
+function buildSystemPrompt(
+  diagnosisResult?: DiagnosisResult,
+  relevantKnowledge?: TaxKnowledgeItem[]
+): string {
   let prompt = `당신은 텍스프리(Tax Free)의 AI 세무 상담사입니다. 개인사업자들의 세금을 책임지는 서비스이며, 법인이 아닌 개인사업자만 대상으로 합니다. 친절하고 이해하기 쉽게 답변해주세요.
 
 주요 역할:
@@ -22,12 +26,37 @@ function buildSystemPrompt(diagnosisResult?: DiagnosisResult): string {
 - 필요시 국세청(126) 또는 세무사 상담 권유
 - 수치가 나오면 명확하게 표시`;
 
+  // 근거 데이터가 있으면 인용 지시 추가
+  if (relevantKnowledge && relevantKnowledge.length > 0) {
+    prompt += `\n\n[근거 인용 규칙]
+아래 참고 자료가 제공되었습니다. 답변할 때 반드시 다음 규칙을 따르세요:
+1. 참고 자료의 내용을 활용하여 답변하세요.
+2. 답변 본문에서 해당 자료를 인용할 때 **[출처 N]** 형식으로 표시하세요. (예: "종합소득세의 기본세율은 6%~45%입니다 **[출처 1]**")
+3. 답변 마지막에 "---" 구분선을 넣고, 인용한 출처 목록을 아래 형식으로 정리하세요:
+
+> **참고 자료**
+> [출처 1] 소득세법 제55조 (세율) — 종합소득세
+> [출처 2] ...
+
+4. 참고 자료에 없는 일반 지식으로 답변하는 부분은 출처 표시 없이 작성해도 됩니다.
+5. 참고 자료가 질문과 관련 없다면 무시하고, 출처 없이 일반 답변하세요.
+
+[참고 자료]`;
+
+    relevantKnowledge.forEach((item, idx) => {
+      prompt += `\n\n[출처 ${idx + 1}] ${item.source} — ${item.category}
+${item.content}`;
+    });
+  }
+
   if (diagnosisResult) {
     prompt += `\n\n[사용자 진단 정보]
-- 사업 유형: ${diagnosisResult.answers.businessType}
-- 월 매출: ${diagnosisResult.answers.monthlyRevenue}
-- 사업자등록: ${diagnosisResult.answers.businessRegistration}
+- 업종: ${diagnosisResult.answers.industry}
+- 과세 유형: ${diagnosisResult.answers.taxStatus}
+- 매출 규모: ${diagnosisResult.answers.revenue}
+- 사업 연차: ${diagnosisResult.answers.businessAge}
 - 직원 수: ${diagnosisResult.answers.employeeCount}
+- 장부 관리: ${diagnosisResult.answers.bookkeeping}
 - 관심 분야: ${diagnosisResult.answers.interestArea}
 - 추천: ${diagnosisResult.recommendation}
 - 예상 종합소득세: ${diagnosisResult.estimatedIncomeTax}만원
@@ -64,7 +93,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const systemPrompt = buildSystemPrompt(diagnosisResult);
+    // 질문에서 관련 지식 검색
+    const relevantKnowledge = findRelevantKnowledge(message);
+
+    const systemPrompt = buildSystemPrompt(diagnosisResult, relevantKnowledge);
 
     // Gemini 모델 생성
     const model = genAI.getGenerativeModel({

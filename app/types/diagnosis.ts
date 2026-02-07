@@ -2,29 +2,56 @@
  * 진단 관련 타입 정의
  */
 
-export type BusinessType = "freelancer" | "online-shop" | "offline-store" | "other";
-export type MonthlyRevenue = "under-500" | "500-2000" | "2000-5000" | "over-5000";
-export type BusinessRegistration = "yes" | "no" | "unknown";
+export type Industry =
+  | "food-store"
+  | "retail"
+  | "service"
+  | "freelancer"
+  | "education"
+  | "other";
+
+export type TaxStatus =
+  | "simplified"
+  | "general"
+  | "exempt"
+  | "unknown";
+
+export type RevenueRange =
+  | "under-24M"
+  | "24-75M"
+  | "75-150M"
+  | "over-150M";
+
+export type BusinessAge = "under-1y" | "1-3y" | "3plus";
 export type EmployeeCount = "none" | "1-4" | "5-plus";
-export type InterestArea = "income-tax" | "vat" | "expenses" | "insurance" | "general";
+export type Bookkeeping =
+  | "simple"
+  | "accountant"
+  | "none"
+  | "unknown";
+export type InterestArea =
+  | "income-tax"
+  | "vat"
+  | "expenses"
+  | "insurance"
+  | "general";
 
 export interface DiagnosisAnswers {
-  businessType: BusinessType;
-  monthlyRevenue: MonthlyRevenue;
-  businessRegistration: BusinessRegistration;
+  industry: Industry;
+  taxStatus: TaxStatus;
+  revenue: RevenueRange;
+  businessAge: BusinessAge;
   employeeCount: EmployeeCount;
+  bookkeeping: Bookkeeping;
   interestArea: InterestArea;
 }
 
 export interface DiagnosisResult {
   answers: DiagnosisAnswers;
   recommendation: string;
-  estimatedIncomeTax: number; // 만원 단위
-  estimatedVAT: number; // 만원 단위
-  estimatedInsurance: number; // 만원 단위
+  estimatedIncomeTax: number;
+  estimatedVAT: number;
+  estimatedInsurance: number;
   taxType: "general" | "simplified";
-  reportSchedule: {
-    incomeTax: string; // "5월"
-    vat: string[]; // ["1월", "7월"]
-  };
+  reportSchedule: { incomeTax: string; vat: string[] };
 }
