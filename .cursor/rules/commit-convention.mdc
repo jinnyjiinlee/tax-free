@@ -1,0 +1,66 @@
+---
+description: Angular Commit Message Convention - 커밋 메시지 작성 시 항상 적용
+alwaysApply: true
+---
+
+# Angular Commit Convention
+
+커밋 메시지는 반드시 아래 형식을 따른다.
+
+## 형식
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+- `scope`, `body`, `footer`는 선택 사항이다.
+- `subject`는 명령문으로 작성하고, 끝에 마침표를 붙이지 않는다.
+- 한 줄은 72자를 넘지 않는다.
+
+## Type 종류
+
+| Type       | 설명                                         |
+|------------|----------------------------------------------|
+| `feat`     | 새로운 기능 추가                              |
+| `fix`      | 버그 수정                                     |
+| `docs`     | 문서 변경 (README 등)                         |
+| `style`    | 코드 포맷팅, 세미콜론 누락 등 (로직 변경 없음) |
+| `refactor` | 리팩토링 (기능 변경 없이 코드 구조 개선)       |
+| `perf`     | 성능 개선                                     |
+| `test`     | 테스트 추가 또는 수정                          |
+| `build`    | 빌드 시스템 또는 외부 의존성 변경 (npm 등)     |
+| `ci`       | CI 설정 파일 및 스크립트 변경                  |
+| `chore`    | 기타 변경 (src, test 수정 없음)               |
+| `revert`   | 이전 커밋 되돌리기                             |
+
+## 예시
+
+```
+feat(auth): 소셜 로그인 기능 추가
+
+Google OAuth2를 사용한 소셜 로그인을 구현한다.
+
+Closes #12
+```
+
+```
+fix(cart): 수량 변경 시 총액 미반영 문제 수정
+```
+
+```
+refactor(api): 공통 에러 핸들링 미들웨어 분리
+```
+
+## Breaking Changes
+
+하위 호환이 깨지는 변경은 `footer`에 `BREAKING CHANGE:`를 명시한다.
+
+```
+feat(api): 응답 포맷을 v2로 변경
+
+BREAKING CHANGE: 기존 v1 응답 포맷은 더 이상 지원하지 않는다.
+```
