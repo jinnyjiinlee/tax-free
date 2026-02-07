@@ -4,7 +4,9 @@
  */
 
 export interface TaxKnowledgeItem {
+  id: string;
   category: string;
+  source: string;
   keywords: string[];
   content: string;
 }
@@ -12,7 +14,9 @@ export interface TaxKnowledgeItem {
 export const TAX_KNOWLEDGE: TaxKnowledgeItem[] = [
   // 종합소득세
   {
+    id: "income-tax-basic",
     category: "종합소득세",
+    source: "소득세법 제55조 (세율)",
     keywords: ["종합소득세", "과세표준", "세율", "기준세율", "누진세율"],
     content: `종합소득세는 근로소득, 사업소득, 기타소득 등 여러 소득을 합산하여 과세하는 세금입니다.
 - 과세표준: 총수입 - 필요경비 - 소득공제
@@ -20,7 +24,9 @@ export const TAX_KNOWLEDGE: TaxKnowledgeItem[] = [
 - 프리랜서는 사업소득으로 신고하며, 총수입에서 경비를 차감한 금액이 과세대상입니다.`,
   },
   {
+    id: "freelancer-income",
     category: "종합소득세",
+    source: "소득세법 제19조 (사업소득), 소득세법 제127조 (원천징수)",
     keywords: ["사업소득", "프리랜서", "프리랜서 세금"],
     content: `프리랜서 사업소득 세금 안내:
 - 사업소득 = 총수입금액 - 필요경비
@@ -30,7 +36,9 @@ export const TAX_KNOWLEDGE: TaxKnowledgeItem[] = [
   },
   // 부가가치세
   {
+    id: "vat-basic",
     category: "부가가치세",
+    source: "부가가치세법 제30조 (세율), 제61조 (신고)",
     keywords: ["부가가치세", "VAT", "부가세", "10%"],
     content: `부가가치세(VAT)는 재화나 용역의 공급에 따라 부과되는 간접세입니다.
 - 일반과세: 10% (공급가액의 10%)
@@ -38,7 +46,9 @@ export const TAX_KNOWLEDGE: TaxKnowledgeItem[] = [
 - 연매출 8,800만원 이하: 간이과세자 (2% 또는 4% 적용)`,
   },
   {
+    id: "simplified-tax",
     category: "부가가치세",
+    source: "부가가치세법 제61조의2 (간이과세자 기준), 국세청 간이과세 안내",
     keywords: ["간이과세", "간이과세자", "8천8백만"],
     content: `간이과세자 기준:
 - 직전 연도 공급가액 8,800만원 이하
@@ -48,7 +58,9 @@ export const TAX_KNOWLEDGE: TaxKnowledgeItem[] = [
   },
   // 사업자등록
   {
+    id: "biz-registration",
     category: "사업자등록",
+    source: "부가가치세법 제8조 (사업자등록), 국세청 홈택스 안내",
     keywords: ["사업자등록", "사업자등록증", "사업자 등록"],
     content: `사업자등록 안내:
 - 사업을 시작하기 전 국세청에 등록
@@ -58,7 +70,9 @@ export const TAX_KNOWLEDGE: TaxKnowledgeItem[] = [
 - 등록 후 즉시 사업용 계좌 개설 권장`,
   },
   {
+    id: "individual-vs-corp",
     category: "사업자등록",
+    source: "소득세법 (개인사업자), 법인세법 (법인)",
     keywords: ["개인사업자", "법인", "개인사업자 vs 법인"],
     content: `개인사업자와 법인 차이:
 - 개인사업자: 사업자등록만 하면 됨, 소규모에 적합
@@ -68,7 +82,9 @@ export const TAX_KNOWLEDGE: TaxKnowledgeItem[] = [
   },
   // 기타
   {
+    id: "social-insurance",
     category: "기타",
+    source: "국민연금법, 국민건강보험법, 고용보험법",
     keywords: ["4대보험", "국민연금", "건강보험", "고용보험"],
     content: `프리랜서 4대보험:
 - 국민연금: 18세~60세 의무가입 (소득無 시 신청으로 연기 가능)
@@ -77,7 +93,9 @@ export const TAX_KNOWLEDGE: TaxKnowledgeItem[] = [
 - 장기요양: 건강보험 가입 시 부과`,
   },
   {
+    id: "tax-schedule",
     category: "기타",
+    source: "소득세법 제70조 (확정신고), 부가가치세법 제49조 (신고기한)",
     keywords: ["세금신고", "연말정산", "종합소득세 신고"],
     content: `세금 신고 일정:
 - 부가세: 매 2개월 25일까지 (짝수월)
