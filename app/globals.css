@@ -2,12 +2,218 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 15, 23, 42;
-  --background-rgb: 248, 250, 252;
+@layer base {
+  :root {
+    --foreground: 29 29 31;       /* Apple #1d1d1f */
+    --foreground-secondary: 110 110 115;  /* Apple #6e6e73 */
+    --background: 251 251 253;    /* Apple #fbfbfd */
+    --primary: 29 29 31;
+    --accent: 49 130 246;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    color: rgb(var(--foreground));
+    background: rgb(var(--background));
+    font-feature-settings: "rlig" 1, "calt" 1;
+    letter-spacing: -0.022em;
+    line-height: 1.47059;
+    font-weight: 400;
+  }
+
+  /* Apple 스타일 타이포그래피 */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    letter-spacing: -0.028em;
+    line-height: 1.1;
+    color: #1d1d1f;
+  }
+
+  h1 {
+    font-weight: 700;
+    letter-spacing: -0.05em;
+    line-height: 1.05;
+  }
+
+  h2 {
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+  }
+
+  h3 {
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+  }
+
+  p {
+    line-height: 1.58;
+    color: #1d1d1f;
+  }
+
+  /* Apple 세컨더리 텍스트 */
+  .text-secondary {
+    color: #6e6e73;
+  }
+
+  /* Apple 스타일 선택 */
+  ::selection {
+    background: rgba(49, 130, 246, 0.15);
+    color: inherit;
+  }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-rgb));
+/* 커스텀 스크롤바 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 유리 효과 */
+.glass {
+  @apply bg-white/80 backdrop-blur-xl border border-white/20;
+}
+
+/* 그라데이션 텍스트 */
+.gradient-text {
+  @apply bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent;
+}
+
+/* 텍스프리 캐릭터 hover 효과 */
+.character-hover:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+.character-hover {
+  transition: transform 0.3s ease;
+}
+
+/* 말풍선 등장 애니메이션 */
+@keyframes bubblePop {
+  0% { opacity: 0; transform: translateY(10px) scale(0.9); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-bubble {
+  animation: bubblePop 0.5s ease-out forwards;
+}
+
+/* 마크다운 스타일링 (AI 채팅 응답용) - Apple 감성 */
+.markdown-body {
+  @apply text-sm;
+  letter-spacing: -0.016em;
+  line-height: 1.58;
+}
+.markdown-body p {
+  @apply mb-2.5 last:mb-0;
+  line-height: 1.58;
+}
+.markdown-body strong {
+  @apply font-semibold;
+  color: #1d1d1f;
+}
+.markdown-body ul {
+  @apply list-disc list-inside mb-2.5 space-y-1.5;
+}
+.markdown-body ol {
+  @apply list-decimal list-inside mb-2.5 space-y-1.5;
+}
+.markdown-body li {
+  @apply text-sm;
+  line-height: 1.58;
+}
+.markdown-body li > p {
+  @apply inline;
+}
+.markdown-body h1, .markdown-body h2, .markdown-body h3 {
+  @apply font-semibold mt-4 mb-1.5;
+  color: #1d1d1f;
+  letter-spacing: -0.025em;
+}
+.markdown-body h1 { @apply text-base; }
+.markdown-body h2 { @apply text-sm; }
+.markdown-body h3 { @apply text-sm; }
+.markdown-body code {
+  @apply bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded text-xs;
+  font-family: "SF Mono", SFMono-Regular, ui-monospace, "Menlo", monospace;
+}
+.markdown-body pre {
+  @apply bg-slate-900 text-slate-100 rounded-xl p-4 mb-3 overflow-x-auto;
+}
+.markdown-body pre code {
+  @apply bg-transparent text-slate-100 p-0;
+}
+.markdown-body table {
+  @apply w-full border-collapse mb-3 text-xs;
+}
+.markdown-body th {
+  @apply bg-blue-50/80 font-semibold px-3 py-2.5 text-left border border-blue-100;
+  color: #1d1d1f;
+}
+.markdown-body td {
+  @apply px-3 py-2.5 border border-slate-100;
+}
+.markdown-body tr:nth-child(even) td {
+  @apply bg-slate-50/50;
+}
+.markdown-body blockquote {
+  @apply border-l-4 border-blue-300 pl-4 py-1.5 my-3 bg-blue-50/30 rounded-r-lg;
+  color: #6e6e73;
+}
+.markdown-body a {
+  @apply text-blue-600 underline underline-offset-2 hover:text-blue-700;
+  text-decoration-thickness: 1px;
+}
+.markdown-body hr {
+  @apply my-4 border-slate-100;
+}
+
+/* 타이핑 커서 */
+.typing-cursor::after {
+  content: "▋";
+  @apply text-blue-500 animate-typing-cursor ml-0.5;
+}
+
+/* 채팅 인풋 글로우 효과 */
+.chat-input-glow:focus-within {
+  box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.1), 0 0 20px rgba(49, 130, 246, 0.08);
+}
+
+/* 스크롤바 커스텀 (채팅영역) */
+.chat-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.chat-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.chat-scroll::-webkit-scrollbar-thumb {
+  background: #93c5fd;
+  border-radius: 2px;
+}
+.chat-scroll::-webkit-scrollbar-thumb:hover {
+  background: #60a5fa;
+}
+
+/* 블루 글로우 효과 */
+.blue-glow {
+  box-shadow: 0 0 30px rgba(49, 130, 246, 0.15), 0 0 60px rgba(49, 130, 246, 0.05);
 }
