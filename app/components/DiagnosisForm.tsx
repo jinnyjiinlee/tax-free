@@ -104,6 +104,7 @@ export default function DiagnosisForm() {
   const router = useRouter();
   const [answers, setAnswers] = useState<Partial<DiagnosisAnswers>>({});
   const [currentStep, setCurrentStep] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSelect = (questionId: keyof DiagnosisAnswers, value: unknown) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
@@ -114,7 +115,8 @@ export default function DiagnosisForm() {
   };
 
   const handleSubmit = () => {
-    if (Object.keys(answers).length === QUESTIONS.length) {
+    if (Object.keys(answers).length === QUESTIONS.length && !isSubmitting) {
+      setIsSubmitting(true);
       sessionStorage.setItem("diagnosisAnswers", JSON.stringify(answers));
       router.push("/dashboard");
     }
@@ -125,6 +127,7 @@ export default function DiagnosisForm() {
 
   return (
     <div className="min-h-screen bg-[#fafbfc] overflow-hidden relative">
+      <a href="#diagnosis-main" className="skip-link">본문으로 건너뛰기</a>
       {/* 배경 장식 */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-blue-100/40 to-transparent rounded-full blur-3xl" />
@@ -132,12 +135,13 @@ export default function DiagnosisForm() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_0.5px,transparent_0.5px),linear-gradient(to_bottom,#e5e7eb_0.5px,transparent_0.5px)] bg-[size:24px_24px] opacity-30 [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,black_20%,transparent_100%)]" />
       </div>
 
-      <div className="relative z-10 max-w-xl mx-auto px-5 py-8 md:py-12">
+      <div id="diagnosis-main" className="relative z-10 max-w-xl mx-auto px-5 py-8 md:py-12">
         {/* 헤더 */}
         <header className="flex items-center justify-between mb-12">
           <Link
             href="/"
-            className="flex items-center gap-2 text-[#86868b] hover:text-[#1d1d1f] transition-colors group"
+            className="flex items-center gap-2 min-h-[44px] items-center text-[#86868b] hover:text-[#1d1d1f] transition-colors group"
+            aria-label="홈으로 돌아가기"
           >
             <span className="w-8 h-8 rounded-full bg-white/80 border border-slate-200 flex items-center justify-center group-hover:bg-slate-50 transition-colors shadow-sm">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,7 +174,14 @@ export default function DiagnosisForm() {
         </div>
 
         {/* 스텝 인디케이터 */}
-        <div className="flex gap-2 mb-8">
+        <div
+          className="flex gap-2 mb-8"
+          role="progressbar"
+          aria-valuenow={currentStep + 1}
+          aria-valuemin={1}
+          aria-valuemax={QUESTIONS.length}
+          aria-label={`진단 진행: ${currentStep + 1} / ${QUESTIONS.length} 단계`}
+        >
           {QUESTIONS.map((_, i) => (
             <div
               key={i}
@@ -185,15 +196,17 @@ export default function DiagnosisForm() {
         <div
           key={currentStep}
           className="bg-white/90 backdrop-blur-sm rounded-3xl border border-slate-200/80 p-8 mb-6 shadow-xl shadow-slate-200/30"
+          role="group"
+          aria-labelledby={`question-${currentStep}-title`}
         >
           <div className="flex items-center gap-2.5 mb-6">
             <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-blue-100 text-blue-700 text-sm font-semibold">
               {currentStep + 1}
             </span>
-            <h2 className="text-lg font-semibold text-[#1d1d1f]">{currentQuestion.title}</h2>
+            <h2 id={`question-${currentStep}-title`} className="text-lg font-semibold text-[#1d1d1f]">{currentQuestion.title}</h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" role="group" aria-label="선택 옵션">
             {currentQuestion.options.map((option: { value: unknown; label: string; iconKey?: keyof typeof ICON_MAP }) => {
               const isSelected = answers[currentQuestion.id] === option.value;
               const IconComponent = option.iconKey ? ICON_MAP[option.iconKey] : null;
@@ -201,7 +214,8 @@ export default function DiagnosisForm() {
                 <button
                   key={String(option.value)}
                   onClick={() => handleSelect(currentQuestion.id, option.value)}
-                  className={`group relative p-5 rounded-2xl border-2 transition-all duration-300 text-left flex items-center gap-4 ${
+                  aria-pressed={isSelected}
+                  className={`group relative p-5 min-h-[44px] rounded-2xl border-2 transition-all duration-300 text-left flex items-center gap-4 ${
                     isSelected
                       ? "border-blue-500 bg-gradient-to-br from-blue-50 to-blue-50/50 shadow-lg shadow-blue-500/10 scale-[1.02]"
                       : "border-slate-100 bg-white/50 hover:border-slate-200 hover:bg-slate-50/80 hover:shadow-md"
@@ -233,19 +247,35 @@ export default function DiagnosisForm() {
           <button
             onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
             disabled={currentStep === 0}
-            className="px-6 py-3.5 rounded-2xl border border-slate-200 text-[#6e6e73] disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white hover:border-slate-300 hover:text-[#1d1d1f] transition-all font-medium text-sm"
+            className="min-h-[44px] px-6 py-3.5 rounded-2xl border border-slate-200 text-[#6e6e73] disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white hover:border-slate-300 hover:text-[#1d1d1f] transition-all font-medium text-sm"
+            aria-label="이전 질문으로"
           >
             ← 이전
           </button>
           {isComplete ? (
             <button
               onClick={handleSubmit}
-              className="px-8 py-3.5 rounded-2xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/25 hover:shadow-2xl hover:shadow-blue-600/30 text-sm flex items-center gap-2"
+              disabled={isSubmitting}
+              className="min-h-[44px] px-8 py-3.5 rounded-2xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/25 hover:shadow-2xl hover:shadow-blue-600/30 text-sm flex items-center gap-2 disabled:opacity-70 disabled:cursor-wait"
+              aria-busy={isSubmitting}
+              aria-label={isSubmitting ? "결과 페이지로 이동 중" : "결과 보기"}
             >
-              결과 보기
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
+              {isSubmitting ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  이동 중...
+                </>
+              ) : (
+                <>
+                  결과 보기
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </>
+              )}
             </button>
           ) : (
             <div className="px-6 py-3.5 text-[#86868b] text-sm font-normal">

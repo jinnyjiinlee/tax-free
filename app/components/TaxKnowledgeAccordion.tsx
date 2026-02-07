@@ -18,7 +18,7 @@ export default function TaxKnowledgeAccordion() {
   const categories = Object.keys(groupedKnowledge);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" role="region" aria-label="세무 기초 지식">
       {categories.map((category, categoryIndex) => {
         const items = groupedKnowledge[category];
         const isOpen = openIndex === categoryIndex;
@@ -27,7 +27,10 @@ export default function TaxKnowledgeAccordion() {
           <div key={category} className="border border-blue-200 rounded-xl overflow-hidden">
             <button
               onClick={() => setOpenIndex(isOpen ? null : categoryIndex)}
-              className="w-full px-6 py-4 bg-blue-50/50 hover:bg-blue-50 transition-colors flex items-center justify-between text-left"
+              aria-expanded={isOpen}
+              aria-controls={`knowledge-content-${categoryIndex}`}
+              id={`knowledge-trigger-${categoryIndex}`}
+              className="w-full px-6 py-4 min-h-[44px] bg-blue-50/50 hover:bg-blue-50 transition-colors flex items-center justify-between text-left"
             >
               <h3 className="font-semibold text-[#1d1d1f]">{category}</h3>
               <svg
@@ -47,7 +50,7 @@ export default function TaxKnowledgeAccordion() {
               </svg>
             </button>
             {isOpen && (
-              <div className="px-6 py-4 bg-white border-t border-blue-100">
+              <div id={`knowledge-content-${categoryIndex}`} className="px-6 py-4 bg-white border-t border-blue-100" role="region" aria-labelledby={`knowledge-trigger-${categoryIndex}`}>
                 <div className="space-y-4">
                   {items.map((item, itemIndex) => (
                     <div key={itemIndex} className="pb-4 last:pb-0 border-b border-blue-50 last:border-0">

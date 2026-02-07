@@ -127,6 +127,10 @@ const FAQ = [
 export default function Home() {
   return (
     <div className="min-h-screen bg-[#fafafa] overflow-hidden">
+      {/* 스킵 링크 - 키보드 사용자 접근성 */}
+      <a href="#main-content" className="skip-link">
+        본문으로 건너뛰기
+      </a>
       {/* 배경 그라데이션 */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-[70vh] bg-gradient-to-b from-blue-50/80 via-white/50 to-transparent" />
@@ -141,12 +145,13 @@ export default function Home() {
             <span className="text-lg font-bold text-slate-900 tracking-tight">텍스프리</span>
           </Link>
           <div className="flex items-center gap-6">
-            <Link href="/chat" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors hidden sm:block">
+            <Link href="/chat" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors hidden sm:inline-flex min-h-[44px] items-center" aria-label="챗봇 바로가기">
               챗봇 바로가기
             </Link>
             <Link
               href="/diagnosis"
-              className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition-colors"
+              className="inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+              aria-label="무료 진단 시작"
             >
               무료 진단 시작
             </Link>
@@ -155,7 +160,7 @@ export default function Home() {
       </nav>
 
       {/* 히어로 */}
-      <section className="relative z-10 pt-16 pb-24 md:pt-24 md:pb-32">
+      <section id="main-content" className="relative z-10 pt-16 pb-24 md:pt-24 md:pb-32" aria-labelledby="hero-title">
         <div className="max-w-5xl mx-auto px-5 lg:px-8">
           <div className="text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 mb-8">
@@ -163,7 +168,7 @@ export default function Home() {
               <span className="text-sm font-medium text-blue-700">개인사업자 전용 · 무료</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-[1.08] tracking-tight mb-6 max-w-4xl mx-auto">
+            <h1 id="hero-title" className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-[1.08] tracking-tight mb-6 max-w-4xl mx-auto">
               세금, 혼자 고민하지
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-500">
@@ -179,7 +184,8 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <Link
                 href="/diagnosis"
-                className="group inline-flex items-center justify-center gap-2.5 w-full sm:w-auto px-8 py-4 rounded-2xl bg-slate-900 text-white font-semibold text-base hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20 hover:shadow-2xl hover:shadow-slate-900/25 hover:-translate-y-0.5"
+                className="group inline-flex items-center justify-center gap-2.5 min-h-[44px] w-full sm:w-auto px-8 py-4 rounded-2xl bg-slate-900 text-white font-semibold text-base hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20 hover:shadow-2xl hover:shadow-slate-900/25 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                aria-label="나의 세무 상태 진단하기"
               >
                 나의 세무 상태 진단하기
                 <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,7 +194,8 @@ export default function Home() {
               </Link>
               <Link
                 href="/chat"
-                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-4 rounded-2xl bg-white border-2 border-slate-200 text-slate-800 font-semibold text-base hover:border-blue-200 hover:bg-blue-50/50 transition-all"
+                className="inline-flex items-center justify-center gap-2 min-h-[44px] w-full sm:w-auto px-8 py-4 rounded-2xl bg-white border-2 border-slate-200 text-slate-800 font-semibold text-base hover:border-blue-200 hover:bg-blue-50/50 transition-all focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                aria-label="챗봇으로 바로 상담하기"
               >
                 <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -232,13 +239,13 @@ export default function Home() {
       </section>
 
       {/* 고민 섹션 */}
-      <section className="relative z-10 py-24 bg-white overflow-hidden">
+      <section id="worries" className="relative z-10 py-24 bg-white overflow-hidden" aria-labelledby="worries-heading">
         <div className="max-w-6xl mx-auto px-5 lg:px-8">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 border border-red-100 mb-6">
               <span className="text-sm font-medium text-red-600">혹시 이런 고민 있으신가요?</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
+            <h2 id="worries-heading" className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
               개인사업자·프리랜서라면
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">
@@ -285,10 +292,10 @@ export default function Home() {
       </section>
 
       {/* 서비스 특징 */}
-      <section className="relative z-10 py-24 bg-slate-50/50">
+      <section id="features" className="relative z-10 py-24 bg-slate-50/50" aria-labelledby="features-heading">
         <div className="max-w-6xl mx-auto px-5 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
+            <h2 id="features-heading" className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
               왜 텍스프리인가요
             </h2>
             <p className="text-slate-600 max-w-xl mx-auto">개인사업자만을 위한 4가지 핵심 가치</p>
@@ -312,10 +319,10 @@ export default function Home() {
       </section>
 
       {/* 사용 방법 */}
-      <section className="relative z-10 py-24 bg-white">
+      <section id="usage" className="relative z-10 py-24 bg-white" aria-labelledby="usage-heading">
         <div className="max-w-6xl mx-auto px-5 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
+            <h2 id="usage-heading" className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
               사용 방법
             </h2>
             <p className="text-slate-600">3단계로 간단하게 시작하세요</p>
@@ -339,35 +346,41 @@ export default function Home() {
       </section>
 
       {/* FAQ */}
-      <section className="relative z-10 py-24 bg-slate-50/50">
+      <section id="faq" className="relative z-10 py-24 bg-slate-50/50" aria-labelledby="faq-heading">
         <div className="max-w-2xl mx-auto px-5 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
+            <h2 id="faq-heading" className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
               자주 묻는 질문
             </h2>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4" role="list">
             {FAQ.map((item, i) => (
-              <div key={i} className="border border-slate-200 rounded-2xl p-6 hover:border-slate-300 transition-colors">
-                <h4 className="font-semibold text-slate-900 mb-2">{item.q}</h4>
-                <p className="text-slate-600 text-sm leading-relaxed">{item.a}</p>
-              </div>
+              <details key={i} className="group border border-slate-200 rounded-2xl overflow-hidden hover:border-slate-300 transition-colors" role="listitem">
+                <summary className="px-6 py-4 cursor-pointer list-none font-semibold text-slate-900 flex justify-between items-center [&::-webkit-details-marker]:hidden">
+                  {item.q}
+                  <span className="text-slate-400 group-open:rotate-180 transition-transform">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  </span>
+                </summary>
+                <div className="px-6 pb-4 pt-0 text-slate-600 text-sm leading-relaxed">{item.a}</div>
+              </details>
             ))}
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="relative z-10 py-24 bg-slate-900">
+      <section id="cta" className="relative z-10 py-24 bg-slate-900" aria-labelledby="cta-heading">
         <div className="max-w-4xl mx-auto px-5 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">
+          <h2 id="cta-heading" className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">
             지금 바로 시작하세요
           </h2>
           <p className="text-slate-400 text-lg mb-10">회원가입 없이, 2분이면 나의 세무 상태를 확인할 수 있어요</p>
           <Link
             href="/diagnosis"
-            className="inline-flex items-center gap-2.5 px-10 py-4 rounded-2xl bg-white text-slate-900 font-bold text-lg hover:bg-slate-100 transition-all shadow-xl"
+            className="inline-flex items-center justify-center min-h-[44px] px-10 py-4 rounded-2xl bg-white text-slate-900 font-bold text-lg hover:bg-slate-100 transition-all shadow-xl focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+            aria-label="무료로 진단받기"
           >
             무료로 진단받기
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
