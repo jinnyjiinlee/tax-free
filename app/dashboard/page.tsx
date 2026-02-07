@@ -24,6 +24,20 @@ export default function DashboardPage() {
   const [result, setResult] = useState<DiagnosisResult | null>(null);
   const [activeTab, setActiveTab] = useState<"chat" | "knowledge" | "calendar">("chat");
 
+  // URL 해시로 탭 상태 유지 (예: /dashboard#knowledge)
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "");
+    const valid = ["chat", "knowledge", "calendar"] as const;
+    if (valid.includes(hash as typeof valid[number])) {
+      setActiveTab(hash as typeof valid[number]);
+    }
+  }, []);
+
+  const handleTabChange = (tab: "chat" | "knowledge" | "calendar") => {
+    setActiveTab(tab);
+    window.history.replaceState(null, "", `#${tab}`);
+  };
+
   const tabs: ("chat" | "knowledge" | "calendar")[] = ["chat", "knowledge", "calendar"];
   const tabLabels = { chat: "AI 상담", knowledge: "기초지식", calendar: "세무 캘린더" };
   const tabIcons = {
@@ -333,7 +347,7 @@ export default function DashboardPage() {
                   aria-selected={activeTab === tab}
                   aria-controls={`panel-${tab}`}
                   id={`tab-${tab}`}
-                  onClick={() => setActiveTab(tab)}
+                  onClick={() => handleTabChange(tab)}
                   onKeyDown={(e) => handleTabKeyDown(e, tab)}
                   className={`flex items-center gap-1.5 px-4 py-2.5 min-h-[40px] rounded-lg font-medium text-sm transition-all duration-300 ${
                     activeTab === tab
