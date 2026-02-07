@@ -56,6 +56,44 @@ const SIMPLIFIED_VAT_RATES: Record<Industry, number> = {
 };
 
 /* ──────────────────────────────────────────
+   유틸리티
+────────────────────────────────────────── */
+
+/**
+ * 문자열로 저장된 매출값을 만원 단위 숫자로 변환
+ * 예: "under-24M" → 2400, "50M" → 5000, "1.5억" → 15000, "3000" → 3000
+ */
+function parseRevenueString(value: unknown): number {
+  if (value === null || value === undefined) return 0;
+
+  const str = String(value).trim().toLowerCase();
+
+  // 순수 숫자 문자열
+  const plainNum = Number(str.replace(/,/g, ""));
+  if (!isNaN(plainNum) && plainNum >= 0) return plainNum;
+
+  // "under-XXM" / "over-XXM" 패턴 (예: "under-24M" → 2400만원)
+  const mPattern = str.match(/(\d+\.?\d*)m/i);
+  if (mPattern) {
+    return Math.floor(parseFloat(mPattern[1]) * 100); // M = 백만원 → 만원 단위
+  }
+
+  // "X억" 패턴
+  const ukPattern = str.match(/(\d+\.?\d*)억/);
+  if (ukPattern) {
+    return Math.floor(parseFloat(ukPattern[1]) * 10000);
+  }
+
+  // "X천만" 패턴
+  const cheonPattern = str.match(/(\d+\.?\d*)천만/);
+  if (cheonPattern) {
+    return Math.floor(parseFloat(cheonPattern[1]) * 1000);
+  }
+
+  return 0;
+}
+
+/* ──────────────────────────────────────────
    계산 함수
 ────────────────────────────────────────── */
 
@@ -118,7 +156,15 @@ function calculateInsurance(
 export function calculateDiagnosisResult(
   answers: DiagnosisAnswers
 ): DiagnosisResult {
-  const { industry, taxStatus, revenue, employeeCount, businessAge, bookkeeping } = answers;
+  const { industry, taxStatus, employeeCount: rawEmployeeCount, businessAge, bookkeeping } = answers;
+
+  // revenue / employeeCount가 문자열로 저장된 경우 안전하게 숫자로 변환
+  const revenue = typeof answers.revenue === "number" && !isNaN(answers.revenue)
+    ? answers.revenue
+    : parseRevenueString(answers.revenue);
+  const employeeCount = typeof rawEmployeeCount === "number" && !isNaN(rawEmployeeCount)
+    ? rawEmployeeCount
+    : (parseInt(String(rawEmployeeCount), 10) || 0);
 
   // 1. 과세 유형 결정
   const isExempt = taxStatus === "exempt";
@@ -201,8 +247,15 @@ export function calculateDiagnosisResult(
     localIncomeTax,
   };
 
+  // answers에 정규화된 숫자값 반영
+  const normalizedAnswers: DiagnosisAnswers = {
+    ...answers,
+    revenue,
+    employeeCount,
+  };
+
   return {
-    answers,
+    answers: normalizedAnswers,
     recommendation,
     estimatedIncomeTax: estimatedIncomeTax + localIncomeTax, // 소득세 + 지방소득세
     estimatedVAT,

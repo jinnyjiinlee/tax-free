@@ -8,7 +8,7 @@ import { calculateDiagnosisResult } from "@/app/utils/diagnosis";
 import { MonthlyTaxChart, TaxCompositionChart, TaxComparisonChart } from "@/app/components/TaxCharts";
 import TaxKnowledgeAccordion from "@/app/components/TaxKnowledgeAccordion";
 import AIChatPanel from "@/app/components/AIChatPanel";
-import { IconCalendar } from "@/app/components/Icons";
+import TaxCalendar from "@/app/components/TaxCalendar";
 
 const INDUSTRY_LABELS: Record<string, string> = {
   "food-store": "음식점/카페",
@@ -99,30 +99,47 @@ export default function DashboardPage() {
 
   const total = result.estimatedIncomeTax + result.estimatedVAT + result.estimatedInsurance;
   const monthlyAvg = Math.floor(total / 12);
+  const savingsEstimate = Math.floor(total * 0.15);
 
   const taxItems = [
-    { label: "예상 종합소득세", value: result.estimatedIncomeTax, color: "blue" },
-    { label: "예상 부가가치세", value: result.estimatedVAT, color: "violet" },
-    { label: "예상 4대보험", value: result.estimatedInsurance, color: "emerald" },
+    {
+      label: "종합소득세",
+      desc: "소득에 대한 세금",
+      value: result.estimatedIncomeTax,
+      gradient: "from-blue-500 to-blue-600",
+      bg: "bg-blue-50",
+      text: "text-blue-600",
+      ring: "ring-blue-100",
+      iconPath: "M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z",
+    },
+    {
+      label: "부가가치세",
+      desc: "매출에 대한 세금",
+      value: result.estimatedVAT,
+      gradient: "from-violet-500 to-purple-600",
+      bg: "bg-violet-50",
+      text: "text-violet-600",
+      ring: "ring-violet-100",
+      iconPath: "M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z",
+    },
+    {
+      label: "4대보험",
+      desc: "사업주 부담분",
+      value: result.estimatedInsurance,
+      gradient: "from-emerald-500 to-teal-600",
+      bg: "bg-emerald-50",
+      text: "text-emerald-600",
+      ring: "ring-emerald-100",
+      iconPath: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
+    },
   ];
 
-  const summaryCards = [
-    {
-      label: "업종",
-      value: INDUSTRY_LABELS[result.answers.industry] || "기타",
-      sub: result.taxType === "simplified" ? "간이과세자" : "일반과세자",
-    },
-    {
-      label: "연간 총 세금",
-      value: `${total.toLocaleString()}만원`,
-      sub: `월 평균 ${monthlyAvg.toLocaleString()}만원`,
-    },
-    {
-      label: "예상 절세액",
-      value: `${Math.floor(total * 0.15).toLocaleString()}만원`,
-      sub: "경비처리 최적화 시",
-    },
-  ];
+  const taxTypeLabel = result.taxType === "simplified" ? "간이과세자" : result.taxType === "exempt" ? "면세사업자" : "일반과세자";
+  const taxTypeBadgeClass = result.taxType === "simplified"
+    ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60"
+    : result.taxType === "exempt"
+    ? "bg-amber-50 text-amber-700 ring-1 ring-amber-200/60"
+    : "bg-blue-50 text-blue-700 ring-1 ring-blue-200/60";
 
   return (
     <div className="min-h-screen bg-[#fafafa] noise-bg">
@@ -149,47 +166,142 @@ export default function DashboardPage() {
           <p className="text-slate-400 font-normal">진단 결과를 바탕으로 준비된 정보입니다</p>
         </div>
 
-        {/* 핵심 요약 카드 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          {summaryCards.map((card) => (
-            <div key={card.label} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
-              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">{card.label}</p>
-              <p className="text-xl font-bold text-[#1d1d1f] tracking-tight">{card.value}</p>
-              <p className="text-sm text-slate-500 mt-0.5">{card.sub}</p>
-            </div>
-          ))}
-        </div>
+        {/* 히어로 진단 결과 */}
+        <div className="relative rounded-3xl mb-6 overflow-hidden">
+          {/* 배경 */}
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
+          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", backgroundSize: "128px" }} />
+          <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 rounded-full blur-[80px]" />
+          <div className="absolute bottom-0 left-0 w-60 h-60 bg-violet-500/8 rounded-full blur-[60px]" />
 
-        {/* 진단 결과 요약 - 프리미엄 카드 */}
-        <div className="gradient-border gradient-border-animated rounded-2xl mb-6">
-          <div className="bg-white rounded-2xl p-6 shadow-premium">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md shadow-blue-500/20">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <div className="relative px-6 py-8 sm:px-8 sm:py-10">
+            {/* 상단: 업종 + 과세유형 */}
+            <div className="flex flex-wrap items-center gap-2.5 mb-6">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm text-white/90 text-xs font-medium ring-1 ring-white/10">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
+                {INDUSTRY_LABELS[result.answers.industry] || "기타"}
+              </span>
+              <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold ${taxTypeBadgeClass}`}>
+                {taxTypeLabel}
+              </span>
+            </div>
+
+            {/* 연간 총 세금 - 히어로 */}
+            <div className="mb-8">
+              <p className="text-sm text-white/50 font-medium mb-1">연간 예상 총 세금</p>
+              <div className="flex items-baseline gap-1">
+                <span className="text-5xl sm:text-6xl font-bold text-white tracking-tighter tabular-nums">
+                  {total.toLocaleString()}
+                </span>
+                <span className="text-xl text-white/50 font-medium">만원</span>
               </div>
-              <h2 className="text-xl font-semibold text-[#1d1d1f]">진단 결과</h2>
+              <p className="text-sm text-white/40 mt-2 font-normal">
+                월 평균 <span className="text-white/70 font-semibold">{monthlyAvg.toLocaleString()}만원</span>
+              </p>
             </div>
-            <p className="text-base text-slate-600 mb-6 font-normal">{result.recommendation}</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {taxItems.map((item) => (
-                <div key={item.label} className="card-premium bg-gradient-to-br from-slate-50 to-white rounded-xl p-5 border border-slate-100">
-                  <div className="text-sm text-slate-400 mb-1.5">{item.label}</div>
-                  <div className="text-2xl font-bold text-[#1d1d1f] tracking-tight">
-                    {item.value.toLocaleString()}<span className="text-base font-medium text-slate-500 ml-0.5">만원</span>
-                  </div>
+
+            {/* 절세 가능성 배지 */}
+            {savingsEstimate > 0 && (
+              <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-500/10 backdrop-blur-sm ring-1 ring-emerald-400/20 mb-8">
+                <div className="w-6 h-6 rounded-full bg-emerald-400/20 flex items-center justify-center">
+                  <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
                 </div>
-              ))}
+                <span className="text-sm text-emerald-300 font-medium">
+                  경비 최적화 시 약 <span className="font-bold text-emerald-200">{savingsEstimate.toLocaleString()}만원</span> 절세 가능
+                </span>
+              </div>
+            )}
+
+            {/* 세금 항목 카드 */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {taxItems.map((item) => {
+                const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
+                return (
+                  <div
+                    key={item.label}
+                    className="group relative bg-white/[0.06] backdrop-blur-sm rounded-2xl p-5 ring-1 ring-white/[0.08] hover:bg-white/[0.1] hover:ring-white/[0.14] transition-all duration-300"
+                  >
+                    {/* 상단 아이콘 + 라벨 */}
+                    <div className="flex items-center gap-2.5 mb-4">
+                      <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-lg`}>
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.iconPath} />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-white/90">{item.label}</p>
+                        <p className="text-[11px] text-white/35">{item.desc}</p>
+                      </div>
+                    </div>
+
+                    {/* 금액 */}
+                    <div className="mb-3">
+                      <span className="text-2xl font-bold text-white tracking-tight tabular-nums">
+                        {item.value.toLocaleString()}
+                      </span>
+                      <span className="text-sm text-white/40 ml-1 font-medium">만원</span>
+                    </div>
+
+                    {/* 비율 바 */}
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex-1 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
+                        <div
+                          className={`h-full rounded-full bg-gradient-to-r ${item.gradient} transition-all duration-700 ease-out`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <span className="text-xs font-semibold text-white/50 tabular-nums w-9 text-right">{pct}%</span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            <div className="mt-5 pt-4 border-t border-slate-100">
-              <div className="text-sm text-slate-400">
-                <span className="font-medium text-slate-600">신고 일정:</span> 종합소득세 {result.reportSchedule.incomeTax}월,
-                부가가치세 {result.reportSchedule.vat.join(", ")}월
+
+            {/* 신고 일정 */}
+            <div className="mt-6 pt-5 border-t border-white/[0.06]">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                  <span className="text-xs text-white/40">종합소득세</span>
+                  <span className="text-xs font-semibold text-white/70">{result.reportSchedule.incomeTax}월</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-violet-400" />
+                  <span className="text-xs text-white/40">부가가치세</span>
+                  <span className="text-xs font-semibold text-white/70">{result.reportSchedule.vat.join(", ")}월</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* 상세 계산 내역 */}
+        {result.detail && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+            {[
+              { label: "연매출", value: `${result.detail.annualRevenue.toLocaleString()}만원`, icon: "M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" },
+              { label: "경비율", value: `${result.detail.expenseRate}%`, icon: "M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" },
+              { label: "과세표준", value: `${result.detail.taxableIncome.toLocaleString()}만원`, icon: "M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" },
+              { label: "적용 세율", value: result.detail.taxBracket.split("(")[0].trim(), icon: "M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" },
+            ].map((stat) => (
+              <div key={stat.label} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 hover:shadow-md hover:border-slate-200 transition-all duration-300">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded-lg bg-slate-50 flex items-center justify-center">
+                    <svg className="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={stat.icon} />
+                    </svg>
+                  </div>
+                  <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">{stat.label}</span>
+                </div>
+                <p className="text-lg font-bold text-[#1d1d1f] tracking-tight">{stat.value}</p>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* 차트 섹션 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -232,24 +344,8 @@ export default function DashboardPage() {
             {activeTab === "chat" && <div role="tabpanel" id="panel-chat" aria-labelledby="tab-chat"><AIChatPanel diagnosisResult={result} /></div>}
             {activeTab === "knowledge" && <div role="tabpanel" id="panel-knowledge" aria-labelledby="tab-knowledge"><TaxKnowledgeAccordion /></div>}
             {activeTab === "calendar" && (
-              <div role="tabpanel" id="panel-calendar" aria-labelledby="tab-calendar" className="text-center py-12 text-slate-400">
-                <p className="mb-4 font-normal">세무 캘린더 기능은 준비 중입니다.</p>
-                <div className="bg-gradient-to-br from-slate-50 to-blue-50/50 rounded-xl p-6 inline-block border border-slate-100">
-                  <div className="text-sm space-y-3 text-left text-slate-600">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
-                        <IconCalendar />
-                      </div>
-                      <span>종합소득세 신고: {result.reportSchedule.incomeTax}월 1일~31일</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
-                        <IconCalendar />
-                      </div>
-                      <span>부가가치세 신고: {result.reportSchedule.vat.join(", ")}월 25일까지</span>
-                    </div>
-                  </div>
-                </div>
+              <div role="tabpanel" id="panel-calendar" aria-labelledby="tab-calendar">
+                <TaxCalendar result={result} />
               </div>
             )}
           </div>
