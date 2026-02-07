@@ -23,9 +23,9 @@
 
 @layer base {
   :root {
-    --foreground: 29 29 31;       /* Apple #1d1d1f */
-    --foreground-secondary: 110 110 115;  /* Apple #6e6e73 */
-    --background: 251 251 253;    /* Apple #fbfbfd */
+    --foreground: 29 29 31;
+    --foreground-secondary: 110 110 115;
+    --background: 251 251 253;
     --primary: 29 29 31;
     --accent: 49 130 246;
   }
@@ -50,7 +50,6 @@
     font-weight: 400;
   }
 
-  /* Apple 스타일 타이포그래피 */
   h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
     letter-spacing: -0.028em;
@@ -79,19 +78,125 @@
     color: #1d1d1f;
   }
 
-  /* Apple 세컨더리 텍스트 */
   .text-secondary {
     color: #6e6e73;
   }
 
-  /* Apple 스타일 선택 */
   ::selection {
     background: rgba(49, 130, 246, 0.15);
     color: inherit;
   }
 }
 
-/* 커스텀 스크롤바 */
+/* ──── 1. 노이즈 텍스처 오버레이 ──── */
+.noise-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 128px;
+}
+
+/* ──── 2. 시머/반짝이 텍스트 효과 (고급) ──── */
+.text-shimmer {
+  background: linear-gradient(
+    110deg,
+    #1e3a8a 25%,
+    #3b82f6 45%,
+    #60a5fa 55%,
+    #1e3a8a 75%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s ease-in-out infinite;
+}
+
+/* ──── 3. 프리미엄 그라데이션 보더 ──── */
+.gradient-border {
+  position: relative;
+  background: white;
+  border-radius: 1rem;
+}
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, #dbeafe, #93c5fd, #dbeafe);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.gradient-border-animated::before {
+  background: linear-gradient(135deg, #dbeafe, #60a5fa, #dbeafe, #93c5fd);
+  background-size: 300% 300%;
+  animation: gradientX 6s ease infinite;
+}
+
+/* ──── 4. 프리미엄 글래스 효과 ──── */
+.glass-premium {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-dark {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ──── 5. 버튼 시머 효과 ──── */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    transparent 100%
+  );
+  transform: rotate(25deg) translateX(-100%);
+  transition: transform 0.6s ease;
+}
+.btn-shine:hover::after {
+  transform: rotate(25deg) translateX(100%);
+}
+
+/* ──── 6. 프리미엄 카드 호버 ──── */
+.card-premium {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-premium:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02), 0 12px 32px rgba(0,0,0,0.06), 0 32px 64px rgba(0,0,0,0.04);
+}
+
+/* ──── 7. 움직이는 그라데이션 배경 ──── */
+.animated-gradient-bg {
+  background: linear-gradient(-45deg, #0f172a, #1e293b, #0f172a, #1e3a5f);
+  background-size: 400% 400%;
+  animation: gradientX 15s ease infinite;
+}
+
+/* ──── 8. 커스텀 스크롤바 ──── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -110,37 +215,33 @@
   background: #94a3b8;
 }
 
-/* 유리 효과 */
+/* ──── 9. 유리 효과 ──── */
 .glass {
   @apply bg-white/80 backdrop-blur-xl border border-white/20;
 }
 
-/* 그라데이션 텍스트 */
 .gradient-text {
   @apply bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent;
 }
 
-/* 텍스프리 캐릭터 hover 효과 */
+/* ──── 10. 캐릭터 hover ──── */
+.character-hover {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
 .character-hover:hover {
   transform: scale(1.05);
-  transition: transform 0.3s ease;
 }
 
-.character-hover {
-  transition: transform 0.3s ease;
-}
-
-/* 말풍선 등장 애니메이션 */
+/* ──── 11. 말풍선 등장 ──── */
 @keyframes bubblePop {
   0% { opacity: 0; transform: translateY(10px) scale(0.9); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
-
 .animate-bubble {
   animation: bubblePop 0.5s ease-out forwards;
 }
 
-/* 마크다운 스타일링 (AI 채팅 응답용) - Apple 감성 */
+/* ──── 12. 마크다운 스타일링 ──── */
 .markdown-body {
   @apply text-sm;
   letter-spacing: -0.016em;
@@ -210,18 +311,21 @@
   @apply my-4 border-slate-100;
 }
 
-/* 타이핑 커서 */
+/* ──── 13. 타이핑 커서 ──── */
 .typing-cursor::after {
   content: "▋";
   @apply text-blue-500 animate-typing-cursor ml-0.5;
 }
 
-/* 채팅 인풋 글로우 효과 */
+/* ──── 14. 채팅 인풋 글로우 (프리미엄) ──── */
 .chat-input-glow:focus-within {
-  box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.1), 0 0 20px rgba(49, 130, 246, 0.08);
+  box-shadow:
+    0 0 0 3px rgba(49, 130, 246, 0.08),
+    0 0 20px rgba(49, 130, 246, 0.06),
+    0 8px 32px rgba(49, 130, 246, 0.04);
 }
 
-/* 스크롤바 커스텀 (채팅영역) */
+/* ──── 15. 채팅 스크롤바 ──── */
 .chat-scroll::-webkit-scrollbar {
   width: 4px;
 }
@@ -236,7 +340,135 @@
   background: #60a5fa;
 }
 
-/* 블루 글로우 효과 */
+/* ──── 16. 블루 글로우 ──── */
 .blue-glow {
   box-shadow: 0 0 30px rgba(49, 130, 246, 0.15), 0 0 60px rgba(49, 130, 246, 0.05);
+}
+
+/* ──── 17. 섹션 디바이더 ──── */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, #e2e8f0, #cbd5e1, #e2e8f0, transparent);
+}
+
+/* ──── 18. 프리미엄 프로그레스바 ──── */
+.progress-gradient {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa, #3b82f6);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease infinite;
+}
+
+/* ──── 19. 스테거드 카드 등장 ──── */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+.stagger-7 { animation-delay: 0.35s; }
+.stagger-8 { animation-delay: 0.4s; }
+
+/* ──── 20. 프리미엄 인풋 ──── */
+.input-premium {
+  @apply bg-white border border-slate-200 rounded-xl;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.input-premium:focus-within {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.08), 0 1px 2px rgba(0,0,0,0.04);
+}
+
+/* ──── 21. 스크롤 리빌 기본 상태 ──── */
+.scroll-hidden {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.scroll-hidden.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+.scroll-hidden-left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.scroll-hidden-left.revealed {
+  opacity: 1;
+  transform: translateX(0);
+}
+.scroll-hidden-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.scroll-hidden-right.revealed {
+  opacity: 1;
+  transform: translateX(0);
+}
+.scroll-hidden-scale {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.scroll-hidden-scale.revealed {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ──── 22. 3D 카드 틸트 ──── */
+.card-3d {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+.card-3d:hover {
+  transform: translateY(-6px) rotateX(2deg) rotateY(-2deg);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.04);
+}
+
+/* ──── 23. 마키 (무한 스크롤) ──── */
+.marquee-container {
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+/* ──── 24. 히어로 마우스 그라디언트 ──── */
+.hero-gradient-follow {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(49, 130, 246, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+  transition: transform 0.3s ease-out;
+  will-change: transform;
+}
+
+/* ──── 25. 인터랙티브 데모 채팅 ──── */
+.demo-chat-window {
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.02),
+    0 12px 40px rgba(0,0,0,0.08),
+    0 40px 80px rgba(0,0,0,0.06);
+}
+
+/* ──── 26. 커넥터 라인 그리기 애니메이션 ──── */
+.connector-line {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transition: stroke-dashoffset 1s ease-in-out;
+}
+.connector-line.revealed {
+  stroke-dashoffset: 0;
+}
+
+/* ──── 27. 카운터 숫자 ──── */
+.counter-value {
+  display: inline-block;
+  min-width: 2ch;
+  font-variant-numeric: tabular-nums;
 }

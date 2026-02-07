@@ -22,13 +22,6 @@ interface TaxChartsProps {
 const COLORS = ["#3182F6", "#60a5fa", "#3b82f6", "#f59e0b"];
 
 export function MonthlyTaxChart({ result }: TaxChartsProps) {
-  const monthlyRevenue = {
-    "under-500": 300,
-    "500-2000": 1250,
-    "2000-5000": 3500,
-    "over-5000": 6000,
-  }[result.answers.monthlyRevenue];
-
   const monthlyIncomeTax = Math.floor(result.estimatedIncomeTax / 12);
   const monthlyVAT = Math.floor(result.estimatedVAT / 12);
   const monthlyInsurance = Math.floor(result.estimatedInsurance / 12);
