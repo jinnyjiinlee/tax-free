@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import {
   ArrowRight,
   ChevronDown,
+  ChevronRight,
   MessageCircle,
   ClipboardCheck,
   BarChart3,
@@ -21,6 +22,12 @@ import {
   Receipt,
   Flame,
   AlertTriangle,
+  CheckCircle,
+  Trophy,
+  RotateCcw,
+  CircleCheck,
+  CircleX,
+  Brain,
 } from "lucide-react";
 import TaxFreeCharacter from "./components/TaxFreeCharacter";
 
@@ -160,16 +167,55 @@ interface LandingTaxEvent {
   title: string;
   category: "income-tax" | "vat" | "withholding";
   tip?: string;
+  what: string;
+  how: string;
+  penalty: string;
 }
 
 const LANDING_TAX_EVENTS: LandingTaxEvent[] = [
-  { month: 1,  day: "1~25일",  deadline: 25, title: "부가가치세 확정신고",       category: "vat" },
-  { month: 3,  day: "10일",    deadline: 10, title: "원천징수 지급명세서 제출",   category: "withholding" },
-  { month: 4,  day: "1~25일",  deadline: 25, title: "부가가치세 예정신고",       category: "vat" },
-  { month: 5,  day: "1~31일",  deadline: 31, title: "종합소득세 확정신고·납부",   category: "income-tax", tip: "개인사업자 최대 세금" },
-  { month: 7,  day: "1~25일",  deadline: 25, title: "부가가치세 확정신고",       category: "vat" },
-  { month: 10, day: "1~25일",  deadline: 25, title: "부가가치세 예정신고",       category: "vat" },
-  { month: 11, day: "1~30일",  deadline: 30, title: "종합소득세 중간예납",       category: "income-tax" },
+  {
+    month: 1, day: "1~25일", deadline: 25, title: "부가가치세 확정신고", category: "vat",
+    what: "7~12월(하반기) 매출·매입에 대한 부가가치세를 정산하는 신고예요.",
+    how: "홈택스 접속 → 부가가치세 신고 → 매출·매입 세금계산서 확인 → 신고서 작성 → 납부",
+    penalty: "무신고 시 납부세액의 20% 가산세, 미납 시 하루 0.022% 지연 가산세가 붙어요.",
+  },
+  {
+    month: 3, day: "10일", deadline: 10, title: "원천징수 지급명세서 제출", category: "withholding",
+    what: "전년도에 직원이나 프리랜서에게 지급한 금액과 원천징수 내역을 국세청에 보고해요.",
+    how: "홈택스 → 지급명세서 제출 → 근로·사업소득 지급명세서 작성 → 제출",
+    penalty: "미제출 시 지급금액의 1% 가산세(지연 제출은 0.5%)가 부과돼요.",
+  },
+  {
+    month: 4, day: "1~25일", deadline: 25, title: "부가가치세 예정신고", category: "vat",
+    what: "1~3월(1분기) 매출·매입에 대해 미리 신고하는 거예요. 일반과세자 대상이에요.",
+    how: "홈택스 → 부가가치세 예정신고 → 1분기 매출·매입 정리 → 신고서 작성 → 납부",
+    penalty: "무신고 시 납부세액의 20% 가산세가 붙어요. 간이과세자는 예정신고 의무가 없어요.",
+  },
+  {
+    month: 5, day: "1~31일", deadline: 31, title: "종합소득세 확정신고·납부", category: "income-tax",
+    tip: "개인사업자 최대 세금",
+    what: "전년도 1년간 벌어들인 모든 소득(사업, 근로, 기타)에 대한 세금을 확정 신고·납부해요.",
+    how: "홈택스 → 종합소득세 신고 → 수입금액 확인 → 경비 입력 → 세액공제 적용 → 납부",
+    penalty: "무신고 시 납부세액의 20%(부정 시 40%) 가산세 + 미납 시 하루 0.022% 지연 가산세가 붙어요.",
+  },
+  {
+    month: 7, day: "1~25일", deadline: 25, title: "부가가치세 확정신고", category: "vat",
+    what: "1~6월(상반기) 매출·매입에 대한 부가가치세를 정산하는 신고예요.",
+    how: "홈택스 → 부가가치세 신고 → 상반기 세금계산서 확인 → 신고서 작성 → 납부",
+    penalty: "무신고 시 납부세액의 20% 가산세, 미납 시 하루 0.022% 지연 가산세가 붙어요.",
+  },
+  {
+    month: 10, day: "1~25일", deadline: 25, title: "부가가치세 예정신고", category: "vat",
+    what: "7~9월(3분기) 매출·매입에 대해 미리 신고하는 거예요. 일반과세자 대상이에요.",
+    how: "홈택스 → 부가가치세 예정신고 → 3분기 매출·매입 정리 → 신고서 작성 → 납부",
+    penalty: "무신고 시 납부세액의 20% 가산세가 붙어요. 간이과세자는 예정신고 의무가 없어요.",
+  },
+  {
+    month: 11, day: "1~30일", deadline: 30, title: "종합소득세 중간예납", category: "income-tax",
+    what: "올해 낼 종합소득세의 절반을 미리 납부하는 제도예요. 전년도 세액 기준으로 고지돼요.",
+    how: "국세청에서 고지서 발송 → 홈택스 또는 은행에서 납부 (별도 신고서 작성 불필요)",
+    penalty: "미납 시 하루 0.022% 지연 가산세가 붙어요. 중간예납세액이 50만원 미만이면 면제돼요.",
+  },
 ];
 
 const LANDING_CAT_STYLE: Record<string, { dot: string; bg: string; text: string; label: string; icon: typeof FileText }> = {
@@ -194,6 +240,7 @@ const MONTH_LABELS = ["1월","2월","3월","4월","5월","6월","7월","8월","9
 
 function LandingTaxCalendar() {
   const currentMonth = new Date().getMonth() + 1;
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   const upcoming = LANDING_TAX_EVENTS
     .filter((e) => !getLandingDday(e.month, e.deadline).past)
     .slice(0, 4);
@@ -253,49 +300,154 @@ function LandingTaxCalendar() {
         })}
       </div>
 
-      {/* 다가오는 일정 카드 */}
+      {/* 다가오는 일정 카드 - 클릭하면 상세 설명 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {upcoming.map((event, i) => {
           const cat = LANDING_CAT_STYLE[event.category];
           const dday = getLandingDday(event.month, event.deadline);
           const CatIcon = cat.icon;
+          const isOpen = expandedIdx === i;
 
           return (
             <div
               key={i}
-              className="group flex items-start gap-4 bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 hover:-translate-y-0.5 transition-all duration-500"
+              className={`bg-white rounded-2xl border overflow-hidden transition-all duration-500 cursor-pointer ${
+                isOpen
+                  ? "border-slate-300 shadow-lg ring-1 ring-slate-200/50"
+                  : "border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 hover:-translate-y-0.5"
+              }`}
+              onClick={() => setExpandedIdx(isOpen ? null : i)}
             >
-              <div className={`w-10 h-10 rounded-xl ${cat.bg} flex items-center justify-center flex-shrink-0 shadow-lg`}>
-                <CatIcon className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={`text-[10px] font-semibold ${cat.text} uppercase tracking-wide`}>{cat.label}</span>
-                  {event.tip && (
-                    <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
-                      {event.tip}
-                    </span>
-                  )}
+              {/* 카드 헤더 */}
+              <div className="flex items-start gap-4 p-5">
+                <div className={`w-10 h-10 rounded-xl ${cat.bg} flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                  <CatIcon className="w-5 h-5 text-white" />
                 </div>
-                <h4 className="font-semibold text-slate-900 text-sm leading-snug">{event.title}</h4>
-                <div className="flex items-center gap-1 mt-1.5">
-                  <Clock className="w-3 h-3 text-slate-300" />
-                  <span className="text-xs text-slate-400">{event.month}월 {event.day}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`text-[10px] font-semibold ${cat.text} uppercase tracking-wide`}>{cat.label}</span>
+                    {event.tip && (
+                      <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
+                        {event.tip}
+                      </span>
+                    )}
+                  </div>
+                  <h4 className="font-semibold text-slate-900 text-sm leading-snug">{event.title}</h4>
+                  <div className="flex items-center gap-1 mt-1.5">
+                    <Clock className="w-3 h-3 text-slate-300" />
+                    <span className="text-xs text-slate-400">{event.month}월 {event.day}</span>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                  <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${
+                    dday.urgent
+                      ? "bg-red-50 text-red-600 ring-1 ring-red-200"
+                      : "bg-slate-50 text-slate-500"
+                  }`}>
+                    {dday.text}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
                 </div>
               </div>
-              <span className={`flex-shrink-0 text-xs font-bold px-2.5 py-1 rounded-lg ${
-                dday.urgent
-                  ? "bg-red-50 text-red-600 ring-1 ring-red-200"
-                  : "bg-slate-50 text-slate-500"
-              }`}>
-                {dday.text}
-              </span>
+
+              {/* 펼침 상세 영역 */}
+              <div className={`grid transition-all duration-500 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+                <div className="overflow-hidden">
+                  <div className="px-5 pb-5 space-y-3 border-t border-slate-100 pt-4">
+                    {/* 이게 뭐예요? */}
+                    <div className="flex gap-3">
+                      <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
+                        <HelpCircle className="w-3.5 h-3.5 text-blue-500" />
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-semibold text-blue-600 mb-0.5">이게 뭐예요?</p>
+                        <p className="text-sm text-slate-600 leading-relaxed">{event.what}</p>
+                      </div>
+                    </div>
+
+                    {/* 어떻게 하나요? */}
+                    <div className="flex gap-3">
+                      <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center">
+                        <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-semibold text-emerald-600 mb-0.5">어떻게 하나요?</p>
+                        <p className="text-sm text-slate-600 leading-relaxed">{event.how}</p>
+                      </div>
+                    </div>
+
+                    {/* 안 하면? */}
+                    <div className="flex gap-3">
+                      <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-red-50 flex items-center justify-center">
+                        <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-semibold text-red-500 mb-0.5">안 하면 어떻게 돼요?</p>
+                        <p className="text-sm text-slate-600 leading-relaxed">{event.penalty}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           );
         })}
       </div>
     </div>
   );
+}
+
+/* ─────────────────────────────────────────
+   Quiz Data
+───────────────────────────────────────── */
+
+const QUIZ_QUESTIONS = [
+  {
+    question: "프리랜서도 부가가치세를 내야 한다",
+    answer: true,
+    explanation: "프리랜서도 사업자등록을 하면 부가가치세 납세 의무가 있어요. 다만 연매출 8,000만원 미만이면 간이과세자로 부담이 줄어요.",
+    tag: "부가세",
+    chatPrompt: "프리랜서 부가가치세 신고 방법 알려주세요",
+  },
+  {
+    question: "간이과세자는 매입세액 공제를 받을 수 없다",
+    answer: false,
+    explanation: "간이과세자도 매입세액의 0.5%를 공제받을 수 있어요. 다만 일반과세자보다 공제율이 낮습니다.",
+    tag: "간이과세",
+    chatPrompt: "간이과세자 매입세액 공제 자세히 알려주세요",
+  },
+  {
+    question: "사업용 차량 유류비는 경비처리가 가능하다",
+    answer: true,
+    explanation: "사업에 사용하는 차량의 유류비, 보험료, 수리비 등은 경비처리 가능해요. 단, 사업용과 개인용을 구분해야 합니다.",
+    tag: "경비처리",
+    chatPrompt: "사업용 차량 경비처리 어디까지 가능한가요?",
+  },
+  {
+    question: "종합소득세는 매달 신고해야 한다",
+    answer: false,
+    explanation: "종합소득세는 매년 5월에 한 번 신고해요. 다만 중간예납(11월)이 있을 수 있어요.",
+    tag: "종합소득세",
+    chatPrompt: "종합소득세 신고 절차와 일정 알려주세요",
+  },
+  {
+    question: "직원 1명만 고용해도 4대보험 가입 의무가 있다",
+    answer: true,
+    explanation: "직원을 1명이라도 고용하면 국민연금, 건강보험, 고용보험, 산재보험 모두 가입해야 해요.",
+    tag: "4대보험",
+    chatPrompt: "직원 고용 시 4대보험 가입 방법 알려주세요",
+  },
+];
+
+type QuizLevel = { label: string; emoji: string; description: string; color: string };
+
+function getQuizLevel(score: number, total: number): QuizLevel {
+  const pct = score / total;
+  if (pct === 1) return { label: "세무 전문가", emoji: "S", description: "완벽해요! 이 정도면 세무사 자격증 도전?", color: "text-amber-500" };
+  if (pct >= 0.8) return { label: "세무 고수", emoji: "A", description: "대부분 알고 계시네요! 실전 절세도 잘 하실 거예요.", color: "text-blue-600" };
+  if (pct >= 0.6) return { label: "세무 중급", emoji: "B", description: "기본은 알고 계세요. 몇 가지만 더 채우면 완벽!", color: "text-emerald-600" };
+  if (pct >= 0.4) return { label: "세무 초보", emoji: "C", description: "괜찮아요. 텍스프리가 하나하나 알려드릴게요.", color: "text-orange-500" };
+  return { label: "세무 입문", emoji: "D", description: "걱정 마세요! 지금부터 알아가면 돼요.", color: "text-red-500" };
 }
 
 /* ─────────────────────────────────────────
@@ -327,6 +479,215 @@ function ScrollReveal({
       style={{ transitionDelay: `${delay}s` }}
     >
       {children}
+    </div>
+  );
+}
+
+/** 세무 상식 퀴즈 */
+function TaxQuiz() {
+  const [currentQ, setCurrentQ] = useState(0);
+  const [userAnswers, setUserAnswers] = useState<(boolean | null)[]>(new Array(QUIZ_QUESTIONS.length).fill(null));
+  const [showResult, setShowResult] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState<boolean | null>(null);
+  const [isRevealed, setIsRevealed] = useState(false);
+
+  const q = QUIZ_QUESTIONS[currentQ];
+  const score = userAnswers.filter((a, i) => a === QUIZ_QUESTIONS[i].answer).length;
+  const answered = userAnswers.filter((a) => a !== null).length;
+
+  const handleAnswer = (ans: boolean) => {
+    if (isRevealed) return;
+    setSelectedAnswer(ans);
+    setIsRevealed(true);
+    const newAnswers = [...userAnswers];
+    newAnswers[currentQ] = ans;
+    setUserAnswers(newAnswers);
+  };
+
+  const handleNext = () => {
+    if (currentQ < QUIZ_QUESTIONS.length - 1) {
+      setCurrentQ((p) => p + 1);
+      setSelectedAnswer(null);
+      setIsRevealed(false);
+    } else {
+      setShowResult(true);
+    }
+  };
+
+  const handleReset = () => {
+    setCurrentQ(0);
+    setUserAnswers(new Array(QUIZ_QUESTIONS.length).fill(null));
+    setShowResult(false);
+    setSelectedAnswer(null);
+    setIsRevealed(false);
+  };
+
+  const isCorrect = selectedAnswer === q.answer;
+  const level = getQuizLevel(score, QUIZ_QUESTIONS.length);
+
+  // 결과 화면
+  if (showResult) {
+    const wrongQuestions = QUIZ_QUESTIONS.filter((_, i) => userAnswers[i] !== QUIZ_QUESTIONS[i].answer);
+    return (
+      <div className="max-w-lg mx-auto">
+        <div className="bg-white rounded-3xl border border-slate-200/80 shadow-premium-lg p-8 text-center">
+          {/* 등급 */}
+          <div className="mb-6">
+            <div className={`inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-slate-50 border border-slate-100 mb-4 ${level.color}`}>
+              <span className="text-3xl font-black">{level.emoji}</span>
+            </div>
+            <h3 className="text-2xl font-bold text-slate-900 tracking-tight mb-1">{level.label}</h3>
+            <p className="text-sm text-slate-500">{level.description}</p>
+          </div>
+
+          {/* 점수 */}
+          <div className="flex items-center justify-center gap-6 py-4 mb-6 border-y border-slate-100">
+            <div>
+              <div className="text-3xl font-bold text-slate-900">{score}<span className="text-lg text-slate-400">/{QUIZ_QUESTIONS.length}</span></div>
+              <div className="text-xs text-slate-500">정답</div>
+            </div>
+            <div className="w-px h-10 bg-slate-200" />
+            <div>
+              <div className="text-3xl font-bold text-slate-900">{Math.round((score / QUIZ_QUESTIONS.length) * 100)}<span className="text-lg text-slate-400">%</span></div>
+              <div className="text-xs text-slate-500">정답률</div>
+            </div>
+          </div>
+
+          {/* 틀린 문제 → 채팅 유도 */}
+          {wrongQuestions.length > 0 && (
+            <div className="text-left mb-6">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">틀린 문제 바로 상담하기</p>
+              <div className="space-y-2">
+                {wrongQuestions.map((wq, i) => (
+                  <Link
+                    key={i}
+                    href={`/chat`}
+                    className="flex items-center gap-3 p-3 rounded-xl bg-blue-50/60 border border-blue-100/80 text-sm text-blue-700 hover:bg-blue-50 transition-colors group"
+                  >
+                    <MessageCircle className="w-4 h-4 flex-shrink-0" />
+                    <span className="flex-1">{wq.tag} 자세히 물어보기</span>
+                    <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 버튼 */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={handleReset}
+              className="flex-1 flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 rounded-xl border border-slate-200 text-slate-700 font-medium text-sm hover:bg-slate-50 transition-colors"
+            >
+              <RotateCcw className="w-4 h-4" />
+              다시 풀기
+            </button>
+            <Link
+              href="/diagnosis"
+              className="flex-1 flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 rounded-xl bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-colors"
+            >
+              맞춤 진단 받기
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 퀴즈 진행 화면
+  return (
+    <div className="max-w-lg mx-auto">
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-premium-lg overflow-hidden">
+        {/* 진행바 */}
+        <div className="px-6 pt-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-medium text-slate-500">{currentQ + 1} / {QUIZ_QUESTIONS.length}</span>
+            <span className="text-xs font-medium text-blue-600">{score}문제 정답</span>
+          </div>
+          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500"
+              style={{ width: `${((currentQ + 1) / QUIZ_QUESTIONS.length) * 100}%` }}
+            />
+          </div>
+        </div>
+
+        {/* 질문 */}
+        <div className="p-6">
+          <div className="inline-flex px-2.5 py-1 rounded-md bg-slate-100 text-xs font-medium text-slate-600 mb-4">
+            {q.tag}
+          </div>
+          <h3 className="text-lg font-semibold text-slate-900 leading-snug mb-6 tracking-tight">
+            &ldquo;{q.question}&rdquo;
+          </h3>
+
+          {/* O / X 버튼 */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <button
+              onClick={() => handleAnswer(true)}
+              disabled={isRevealed}
+              className={`flex flex-col items-center gap-2 p-5 rounded-2xl border-2 transition-all duration-300 min-h-[80px] ${
+                isRevealed && q.answer === true
+                  ? "border-emerald-500 bg-emerald-50"
+                  : isRevealed && selectedAnswer === true && !isCorrect
+                  ? "border-red-400 bg-red-50"
+                  : !isRevealed
+                  ? "border-slate-100 bg-slate-50/50 hover:border-slate-200 hover:bg-white hover:shadow-md cursor-pointer"
+                  : "border-slate-100 bg-slate-50/30 opacity-60"
+              }`}
+            >
+              <CircleCheck className={`w-7 h-7 ${
+                isRevealed && q.answer === true ? "text-emerald-500" : isRevealed && selectedAnswer === true && !isCorrect ? "text-red-400" : "text-emerald-400"
+              }`} strokeWidth={2} />
+              <span className="font-semibold text-slate-700">O</span>
+            </button>
+            <button
+              onClick={() => handleAnswer(false)}
+              disabled={isRevealed}
+              className={`flex flex-col items-center gap-2 p-5 rounded-2xl border-2 transition-all duration-300 min-h-[80px] ${
+                isRevealed && q.answer === false
+                  ? "border-emerald-500 bg-emerald-50"
+                  : isRevealed && selectedAnswer === false && !isCorrect
+                  ? "border-red-400 bg-red-50"
+                  : !isRevealed
+                  ? "border-slate-100 bg-slate-50/50 hover:border-slate-200 hover:bg-white hover:shadow-md cursor-pointer"
+                  : "border-slate-100 bg-slate-50/30 opacity-60"
+              }`}
+            >
+              <CircleX className={`w-7 h-7 ${
+                isRevealed && q.answer === false ? "text-emerald-500" : isRevealed && selectedAnswer === false && !isCorrect ? "text-red-400" : "text-red-400"
+              }`} strokeWidth={2} />
+              <span className="font-semibold text-slate-700">X</span>
+            </button>
+          </div>
+
+          {/* 해설 */}
+          {isRevealed && (
+            <div className={`rounded-2xl p-4 mb-4 border ${isCorrect ? "bg-emerald-50/60 border-emerald-100" : "bg-amber-50/60 border-amber-100"}`}>
+              <div className="flex items-center gap-2 mb-1.5">
+                {isCorrect ? (
+                  <span className="text-sm font-semibold text-emerald-700">정답!</span>
+                ) : (
+                  <span className="text-sm font-semibold text-amber-700">오답 — 정답은 {q.answer ? "O" : "X"}</span>
+                )}
+              </div>
+              <p className="text-sm text-slate-600 leading-relaxed">{q.explanation}</p>
+            </div>
+          )}
+
+          {/* 다음 버튼 */}
+          {isRevealed && (
+            <button
+              onClick={handleNext}
+              className="w-full flex items-center justify-center gap-2 min-h-[48px] py-3 rounded-xl bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-colors"
+            >
+              {currentQ < QUIZ_QUESTIONS.length - 1 ? "다음 문제" : "결과 보기"}
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -664,6 +1025,38 @@ export default function Home() {
               </ScrollReveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      <div className="section-divider" />
+
+      {/* ████████ 세무 상식 퀴즈 ████████ */}
+      <section className="relative z-10 py-24 bg-white overflow-hidden">
+        <div className="absolute top-20 left-0 w-80 h-80 bg-violet-50/20 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-10 right-0 w-64 h-64 bg-blue-50/25 rounded-full blur-[80px] pointer-events-none" />
+
+        <div className="relative max-w-6xl mx-auto px-5 lg:px-8">
+          <ScrollReveal className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-50/80 border border-violet-100/60 mb-6">
+              <Brain className="w-4 h-4 text-violet-600" />
+              <span className="text-sm font-medium text-violet-700 tracking-tight">세무 상식 테스트</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-[-0.03em]">
+              나의 세무 지식은
+              <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-blue-600">
+                몇 점일까?
+              </span>
+            </h2>
+            <p className="text-slate-500 max-w-md mx-auto text-[15px]">
+              5개 O/X 퀴즈로 세무 상식을 점검하고,<br className="hidden sm:block" />
+              틀린 문제는 AI에게 바로 물어보세요
+            </p>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.15}>
+            <TaxQuiz />
+          </ScrollReveal>
         </div>
       </section>
 
