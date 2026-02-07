@@ -454,7 +454,7 @@ export default function DiagnosisPage() {
         </div>
 
         {/* 하단 네비게이션 */}
-        <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white/95 to-transparent pt-8 pb-6 px-4">
+        <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white/95 to-transparent pt-8 px-4" style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}>
           <div className="max-w-xl mx-auto flex justify-between gap-4">
             <button
               onClick={handlePrev}
