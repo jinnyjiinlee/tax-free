@@ -35,18 +35,26 @@ export default function DashboardPage() {
 
   if (!result) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-[#6e6e73] font-normal">로딩 중...</div>
+      <div className="min-h-screen flex items-center justify-center" role="status" aria-live="polite" aria-label="대시보드 로딩 중">
+        <div className="w-full max-w-md space-y-6 p-8">
+          <div className="h-8 bg-slate-200 rounded-lg animate-pulse" />
+          <div className="h-32 bg-slate-100 rounded-2xl animate-pulse" />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="h-24 bg-slate-100 rounded-xl animate-pulse" />
+            <div className="h-24 bg-slate-100 rounded-xl animate-pulse" />
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50/50 via-white to-blue-50/20">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <a href="#dashboard-main" className="skip-link">본문으로 건너뛰기</a>
+      <div className="max-w-7xl mx-auto px-4 py-8" id="dashboard-main">
         {/* 헤더 */}
         <header className="flex items-center justify-between mb-8">
-          <Link href="/" className="flex items-center gap-2 text-[#6e6e73] hover:text-blue-700 transition-colors">
+          <Link href="/" className="flex items-center gap-2 min-h-[44px] items-center text-[#6e6e73] hover:text-blue-700 transition-colors" aria-label="홈으로 돌아가기">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
@@ -107,10 +115,15 @@ export default function DashboardPage() {
         {/* 탭 섹션 */}
         <div className="bg-white rounded-2xl shadow-xl shadow-blue-200/50 border border-blue-100 overflow-hidden">
           {/* 탭 헤더 */}
-          <div className="flex border-b border-blue-100">
+          <div role="tablist" aria-label="대시보드 메뉴" className="flex border-b border-blue-100">
             <button
+              role="tab"
+              aria-selected={activeTab === "chat"}
+              aria-controls="panel-chat"
+              id="tab-chat"
               onClick={() => setActiveTab("chat")}
-              className={`flex-1 px-6 py-4 font-medium text-sm transition-colors ${
+              onKeyDown={(e) => handleTabKeyDown(e, "chat")}
+              className={`flex-1 px-6 py-4 min-h-[44px] font-medium text-sm transition-colors ${
                 activeTab === "chat"
                   ? "text-blue-700 border-b-2 border-blue-600 bg-blue-50/50"
                   : "text-[#86868b] hover:text-blue-600 hover:bg-blue-50/30"
@@ -119,8 +132,13 @@ export default function DashboardPage() {
               AI 상담
             </button>
             <button
+              role="tab"
+              aria-selected={activeTab === "knowledge"}
+              aria-controls="panel-knowledge"
+              id="tab-knowledge"
               onClick={() => setActiveTab("knowledge")}
-              className={`flex-1 px-6 py-4 font-medium text-sm transition-colors ${
+              onKeyDown={(e) => handleTabKeyDown(e, "knowledge")}
+              className={`flex-1 px-6 py-4 min-h-[44px] font-medium text-sm transition-colors ${
                 activeTab === "knowledge"
                   ? "text-blue-700 border-b-2 border-blue-600 bg-blue-50/50"
                   : "text-[#86868b] hover:text-blue-600 hover:bg-blue-50/30"
@@ -129,8 +147,13 @@ export default function DashboardPage() {
               기초지식
             </button>
             <button
+              role="tab"
+              aria-selected={activeTab === "calendar"}
+              aria-controls="panel-calendar"
+              id="tab-calendar"
               onClick={() => setActiveTab("calendar")}
-              className={`flex-1 px-6 py-4 font-medium text-sm transition-colors ${
+              onKeyDown={(e) => handleTabKeyDown(e, "calendar")}
+              className={`flex-1 px-6 py-4 min-h-[44px] font-medium text-sm transition-colors ${
                 activeTab === "calendar"
                   ? "text-blue-700 border-b-2 border-blue-600 bg-blue-50/50"
                   : "text-[#86868b] hover:text-blue-600 hover:bg-blue-50/30"
@@ -142,10 +165,10 @@ export default function DashboardPage() {
 
           {/* 탭 컨텐츠 */}
           <div className="p-6">
-            {activeTab === "chat" && <AIChatPanel diagnosisResult={result} />}
-            {activeTab === "knowledge" && <TaxKnowledgeAccordion />}
+            {activeTab === "chat" && <div role="tabpanel" id="panel-chat" aria-labelledby="tab-chat"><AIChatPanel diagnosisResult={result} /></div>}
+            {activeTab === "knowledge" && <div role="tabpanel" id="panel-knowledge" aria-labelledby="tab-knowledge"><TaxKnowledgeAccordion /></div>}
             {activeTab === "calendar" && (
-              <div className="text-center py-12 text-[#6e6e73]">
+              <div role="tabpanel" id="panel-calendar" aria-labelledby="tab-calendar" className="text-center py-12 text-[#6e6e73]">
                 <p className="mb-4 font-normal">세무 캘린더 기능은 준비 중입니다.</p>
                 <div className="bg-blue-50/50 rounded-xl p-6 inline-block">
                   <div className="text-sm space-y-2.5 text-left text-[#424245]">

@@ -487,7 +487,7 @@ export default function AIChatPanel({
         ))}
 
         {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-          <div className="flex gap-2.5 justify-start animate-message-in-left">
+          <div className="flex gap-2.5 justify-start animate-message-in-left" role="status" aria-live="polite" aria-label="AI가 답변을 작성하고 있습니다">
             <div className="flex-shrink-0 mt-1">
               <div className="w-8 h-8 rounded-xl overflow-hidden shadow-sm bg-gradient-to-br from-blue-50 to-blue-100">
                 <Image
@@ -568,7 +568,7 @@ export default function AIChatPanel({
                 handleSend(input);
               }
             }}
-            placeholder={isLoading ? "답변을 기다리는 중..." : "예: 경비처리 어떻게 하나요?"}
+            placeholder={isLoading ? "답변을 기다리는 중..." : "예: 경비처리 어떻게 하나요? (Enter로 전송)"}
             disabled={isLoading}
             rows={1}
             className="flex-1 resize-none bg-transparent text-sm text-[#1d1d1f] placeholder:text-[#86868b] focus:outline-none disabled:opacity-50 max-h-[120px] py-2 min-h-[44px]"
@@ -588,7 +588,7 @@ export default function AIChatPanel({
         </div>
 
         <p className="text-center text-[11px] text-[#86868b] mt-2 font-normal">
-          AI가 제공하는 정보는 참고용이며, 정확한 세무 상담은 전문가에게 문의하세요
+          AI가 제공하는 정보는 참고용이며, 정확한 세무 상담은 전문가에게 문의하세요 · Enter로 전송
         </p>
       </div>
     </div>

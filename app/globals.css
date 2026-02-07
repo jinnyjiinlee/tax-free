@@ -1,4 +1,23 @@
 @tailwind base;
+
+/* 스킵 링크 - 접근성 */
+.skip-link {
+  @apply absolute -top-16 left-4 z-[100] px-4 py-2 bg-slate-900 text-white rounded-lg focus:top-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-[top];
+}
+
+/* 포커스 스타일 - 키보드 네비게이션 */
+*:focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 @tailwind components;
 @tailwind utilities;
 
@@ -16,6 +35,10 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
   }
 
   body {

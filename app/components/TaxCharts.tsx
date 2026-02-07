@@ -43,7 +43,7 @@ export function MonthlyTaxChart({ result }: TaxChartsProps) {
   ];
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+    <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100" role="img" aria-label="월별 예상 세금 차트">
       <h3 className="text-lg font-semibold text-[#1d1d1f] mb-4">월별 예상 세금</h3>
       <ResponsiveContainer width="100%" height={250}>
         <BarChart data={data}>
@@ -72,7 +72,7 @@ export function TaxCompositionChart({ result }: TaxChartsProps) {
   ];
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+    <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100" role="img" aria-label="세금 구성 비율 차트">
       <h3 className="text-lg font-semibold text-[#1d1d1f] mb-4">세금 구성 비율</h3>
       <ResponsiveContainer width="100%" height={250}>
         <PieChart>
@@ -114,7 +114,7 @@ export function TaxComparisonChart({ result }: TaxChartsProps) {
   ];
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+    <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100" role="img" aria-label="절세 전후 비교 차트">
       <h3 className="text-lg font-semibold text-[#1d1d1f] mb-4">절세 전후 비교</h3>
       <ResponsiveContainer width="100%" height={250}>
         <BarChart data={data}>
