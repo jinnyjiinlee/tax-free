@@ -277,8 +277,8 @@ function MarqueeRow({ items, reverse = false }: { items: typeof WORRIES_ROW1; re
 }
 
 /** FAQ 아이템 */
-function FAQItem({ item, index }: { item: typeof FAQ[0]; index: number }) {
-  const [open, setOpen] = useState(false);
+function FAQItem({ item, index, defaultOpen = false }: { item: typeof FAQ[0]; index: number; defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen);
   return (
     <ScrollReveal delay={index * 0.08}>
       <div className={`bg-white border rounded-2xl overflow-hidden transition-all duration-500 ${open ? "border-slate-200 shadow-premium" : "border-slate-100 hover:border-slate-200/80 shadow-premium hover:shadow-premium-lg"}`}>
@@ -585,7 +585,7 @@ export default function Home() {
 
           <div className="space-y-3">
             {FAQ.map((item, i) => (
-              <FAQItem key={i} item={item} index={i} />
+              <FAQItem key={i} item={item} index={i} defaultOpen={i === 0} />
             ))}
           </div>
         </div>
