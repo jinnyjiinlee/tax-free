@@ -408,6 +408,9 @@ const QUIZ_QUESTIONS = [
     explanation: "프리랜서도 사업자등록을 하면 부가가치세 납세 의무가 있어요. 다만 연매출 8,000만원 미만이면 간이과세자로 부담이 줄어요.",
     tag: "부가세",
     chatPrompt: "프리랜서 부가가치세 신고 방법 알려주세요",
+    terms: [
+      { word: "부가가치세", meaning: "물건이나 서비스를 팔 때 가격에 포함되는 세금 (보통 10%). 소비자가 내는 세금을 사업자가 대신 걷어서 국세청에 납부해요." },
+    ],
   },
   {
     question: "간이과세자는 매입세액 공제를 받을 수 없다",
@@ -415,6 +418,10 @@ const QUIZ_QUESTIONS = [
     explanation: "간이과세자도 매입세액의 0.5%를 공제받을 수 있어요. 다만 일반과세자보다 공제율이 낮습니다.",
     tag: "간이과세",
     chatPrompt: "간이과세자 매입세액 공제 자세히 알려주세요",
+    terms: [
+      { word: "간이과세자", meaning: "연매출 8,000만원 미만인 소규모 사업자에게 부가세를 적게 매기는 제도. 세금계산서 발행 의무가 없고 신고도 간편해요." },
+      { word: "매입세액 공제", meaning: "사업에 필요한 물건을 살 때 낸 부가세(매입세액)를 내야 할 부가세에서 빼주는 것. 사업 비용을 줄여주는 제도예요." },
+    ],
   },
   {
     question: "사업용 차량 유류비는 경비처리가 가능하다",
@@ -422,6 +429,9 @@ const QUIZ_QUESTIONS = [
     explanation: "사업에 사용하는 차량의 유류비, 보험료, 수리비 등은 경비처리 가능해요. 단, 사업용과 개인용을 구분해야 합니다.",
     tag: "경비처리",
     chatPrompt: "사업용 차량 경비처리 어디까지 가능한가요?",
+    terms: [
+      { word: "경비처리", meaning: "사업을 운영하면서 쓴 돈을 '비용'으로 인정받는 것. 경비로 인정되면 그만큼 소득이 줄어서 세금이 줄어들어요." },
+    ],
   },
   {
     question: "종합소득세는 매달 신고해야 한다",
@@ -429,6 +439,9 @@ const QUIZ_QUESTIONS = [
     explanation: "종합소득세는 매년 5월에 한 번 신고해요. 다만 중간예납(11월)이 있을 수 있어요.",
     tag: "종합소득세",
     chatPrompt: "종합소득세 신고 절차와 일정 알려주세요",
+    terms: [
+      { word: "종합소득세", meaning: "1년간 벌어들인 모든 소득(사업, 근로, 이자, 배당 등)을 합산해서 내는 세금. 매년 5월에 신고·납부해요." },
+    ],
   },
   {
     question: "직원 1명만 고용해도 4대보험 가입 의무가 있다",
@@ -436,6 +449,9 @@ const QUIZ_QUESTIONS = [
     explanation: "직원을 1명이라도 고용하면 국민연금, 건강보험, 고용보험, 산재보험 모두 가입해야 해요.",
     tag: "4대보험",
     chatPrompt: "직원 고용 시 4대보험 가입 방법 알려주세요",
+    terms: [
+      { word: "4대보험", meaning: "국민연금·건강보험·고용보험·산재보험을 합쳐 부르는 말. 직원을 고용하면 사업주와 직원이 반반씩 부담해요." },
+    ],
   },
 ];
 
@@ -490,6 +506,7 @@ function TaxQuiz() {
   const [showResult, setShowResult] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<boolean | null>(null);
   const [isRevealed, setIsRevealed] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
 
   const q = QUIZ_QUESTIONS[currentQ];
   const score = userAnswers.filter((a, i) => a === QUIZ_QUESTIONS[i].answer).length;
@@ -509,6 +526,7 @@ function TaxQuiz() {
       setCurrentQ((p) => p + 1);
       setSelectedAnswer(null);
       setIsRevealed(false);
+      setShowTerms(false);
     } else {
       setShowResult(true);
     }
@@ -520,6 +538,7 @@ function TaxQuiz() {
     setShowResult(false);
     setSelectedAnswer(null);
     setIsRevealed(false);
+    setShowTerms(false);
   };
 
   const isCorrect = selectedAnswer === q.answer;
@@ -618,9 +637,40 @@ function TaxQuiz() {
           <div className="inline-flex px-2.5 py-1 rounded-md bg-slate-100 text-xs font-medium text-slate-600 mb-4">
             {q.tag}
           </div>
-          <h3 className="text-lg font-semibold text-slate-900 leading-snug mb-6 tracking-tight">
+          <h3 className="text-lg font-semibold text-slate-900 leading-snug mb-4 tracking-tight">
             &ldquo;{q.question}&rdquo;
           </h3>
+
+          {/* 용어 설명 */}
+          {q.terms && q.terms.length > 0 && (
+            <div className="mb-5">
+              <button
+                onClick={() => setShowTerms(!showTerms)}
+                className={`inline-flex items-center gap-1.5 text-xs font-medium transition-colors ${
+                  showTerms ? "text-violet-600" : "text-slate-400 hover:text-slate-600"
+                }`}
+              >
+                <HelpCircle className={`w-3.5 h-3.5 transition-transform ${showTerms ? "rotate-12" : ""}`} />
+                {showTerms ? "용어 설명 닫기" : "이 용어가 뭐예요?"}
+              </button>
+              <div className={`grid transition-all duration-400 ${showTerms ? "grid-rows-[1fr] opacity-100 mt-3" : "grid-rows-[0fr] opacity-0"}`}>
+                <div className="overflow-hidden">
+                  <div className="space-y-2">
+                    {q.terms.map((term, ti) => (
+                      <div key={ti} className="flex gap-3 p-3 rounded-xl bg-violet-50/60 border border-violet-100/80">
+                        <span className="flex-shrink-0 px-2 py-0.5 rounded-md bg-violet-100 text-violet-700 text-xs font-semibold h-fit mt-0.5">
+                          {term.word}
+                        </span>
+                        <p className="text-xs text-slate-600 leading-relaxed">
+                          {term.meaning}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* O / X 버튼 */}
           <div className="grid grid-cols-2 gap-3 mb-4">
