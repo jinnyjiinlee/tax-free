@@ -155,9 +155,18 @@ export default function DashboardPage() {
             </span>
             <span className="text-sm font-medium">홈으로</span>
           </Link>
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-blue-500/20">T</div>
-            <span className="font-semibold text-[#1d1d1f]">텍스프리</span>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/diagnosis"
+              className="text-sm font-medium text-slate-400 hover:text-slate-700 transition-colors min-h-[44px] flex items-center"
+            >
+              진단 다시하기
+            </Link>
+            <div className="w-px h-5 bg-slate-200" />
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-blue-500/20">T</div>
+              <span className="font-semibold text-[#1d1d1f]">텍스프리</span>
+            </div>
           </div>
         </header>
 
